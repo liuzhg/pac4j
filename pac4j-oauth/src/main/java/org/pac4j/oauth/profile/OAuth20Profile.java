@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public abstract class OAuth20Profile extends CommonProfile {
     /**
      * Set the access token
      * 
-     * @param accessToken
+     * @param accessToken the access token secret
      */
     public void setAccessToken(final String accessToken) {
         addAttribute(OAuthAttributesDefinition.ACCESS_TOKEN, accessToken);
@@ -44,5 +44,10 @@ public abstract class OAuth20Profile extends CommonProfile {
      */
     public String getAccessToken() {
         return (String) getAttribute(OAuthAttributesDefinition.ACCESS_TOKEN);
+    }
+
+    @Override
+    public void clear() {
+        this.setAccessToken("");
     }
 }

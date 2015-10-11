@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.jasig.cas.client.Protocol;
+import org.jasig.cas.client.configuration.ConfigurationKeys;
 import org.jasig.cas.client.session.HashMapBackedSessionMappingStorage;
 import org.jasig.cas.client.session.SessionMappingStorage;
 import org.jasig.cas.client.session.SingleSignOutHandler;
@@ -34,8 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is the logout handler for the {@link CasClient} class based on the {@link SingleSignOutHandler} class of the Jasig CAS client.<br />
- * It should only be used in J2E context.
+ * <p>This class is the logout handler for the {@link CasClient} class based on the {@link SingleSignOutHandler} class of the Jasig CAS client.</p>
+ * <p>It should only be used in J2E context.</p>
  * 
  * @author Jerome Leleu
  * @since 1.4.0
@@ -46,9 +48,9 @@ public class CasSingleSignOutHandler implements LogoutHandler {
 
     private SessionMappingStorage sessionMappingStorage = new HashMapBackedSessionMappingStorage();
 
-    private String artifactParameterName = SingleSignOutHandler.DEFAULT_ARTIFACT_PARAMETER_NAME;
+    private String artifactParameterName = Protocol.CAS2.getArtifactParameterName();
 
-    private String logoutParameterName = SingleSignOutHandler.DEFAULT_LOGOUT_PARAMETER_NAME;
+    private String logoutParameterName = ConfigurationKeys.LOGOUT_PARAMETER_NAME.getDefaultValue();
 
     private List<String> safeParameters= Arrays.asList(this.logoutParameterName);
     
@@ -66,7 +68,7 @@ public class CasSingleSignOutHandler implements LogoutHandler {
      * Construct an instance from a given {@link SingleSignOutHandler} class.
      * The provided handler is not taken into account.
      * 
-     * @param singleSignOutHandler
+     * @param singleSignOutHandler the real SSOut handler
      */
     @Deprecated
     public CasSingleSignOutHandler(final SingleSignOutHandler singleSignOutHandler) {

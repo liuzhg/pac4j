@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.openid4java.message.AuthSuccess;
 import org.openid4java.message.MessageException;
 import org.openid4java.message.ParameterList;
 import org.openid4java.message.ax.FetchRequest;
-import org.pac4j.core.client.BaseClient;
-import org.pac4j.core.client.Mechanism;
+import org.pac4j.core.client.IndirectClient;
+import org.pac4j.core.client.ClientType;
 import org.pac4j.core.client.RedirectAction;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.exception.TechnicalException;
@@ -44,7 +44,7 @@ import org.pac4j.openid.credentials.OpenIdCredentials;
  * @author Jerome Leleu
  * @since 1.4.0
  */
-public abstract class BaseOpenIdClient<U extends CommonProfile> extends BaseClient<OpenIdCredentials, U> {
+public abstract class BaseOpenIdClient<U extends CommonProfile> extends IndirectClient<OpenIdCredentials, U> {
 
     private static final String OPENID_MODE = "openid.mode";
 
@@ -63,7 +63,7 @@ public abstract class BaseOpenIdClient<U extends CommonProfile> extends BaseClie
     /**
      * Return the user identifier for the web context.
      * 
-     * @param context
+     * @param context the web context
      * @return the user identifier
      */
     protected abstract String getUser(WebContext context);
@@ -81,7 +81,7 @@ public abstract class BaseOpenIdClient<U extends CommonProfile> extends BaseClie
      * Get a fetch request for attributes.
      * 
      * @return a fetch request for attributes
-     * @throws MessageException
+     * @throws MessageException an OpenID exception
      */
     protected abstract FetchRequest getFetchRequest() throws MessageException;
 
@@ -152,9 +152,9 @@ public abstract class BaseOpenIdClient<U extends CommonProfile> extends BaseClie
     /**
      * Create the appropriate OpenID profile.
      * 
-     * @param authSuccess
+     * @param authSuccess the authentication success message
      * @return the appropriate OpenID profile
-     * @throws MessageException
+     * @throws MessageException an OpenID exception
      */
     protected abstract U createProfile(AuthSuccess authSuccess) throws MessageException;
 
@@ -193,7 +193,7 @@ public abstract class BaseOpenIdClient<U extends CommonProfile> extends BaseClie
     }
 
     @Override
-    public Mechanism getMechanism() {
-        return Mechanism.OPENID_PROTOCOL;
+    public ClientType getClientType() {
+        return ClientType.OPENID_PROTOCOL;
     }
 }

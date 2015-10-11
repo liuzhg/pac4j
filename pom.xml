@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-   Copyright 2012 - 2014 Jerome Leleu
+   Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@
 	<artifactId>pac4j</artifactId>
 	<packaging>pom</packaging>
 	<name>pac4j</name>
-	<version>1.6.1-SNAPSHOT</version>
+	<version>1.8.0-RC2-SNAPSHOT</version>
 	<description>Profile &amp; Authentication Client for Java</description>
-	<url>https://github.com/leleuj/pac4j</url>
+	<url>https://github.com/pac4j/pac4j</url>
 
 	<licenses>
 		<license>
@@ -40,9 +40,9 @@
 	</licenses>
 
 	<scm>
-		<url>http://github.com/leleuj/pac4j.git</url>
-		<connection>scm:git:git@github.com:leleuj/pac4j.git</connection>
-		<developerConnection>scm:git:git@github.com:leleuj/pac4j.git</developerConnection>
+		<url>https://github.com/pac4j/pac4j.git</url>
+		<connection>scm:git:git@github.com:pac4j/pac4j.git</connection>
+		<developerConnection>scm:git:git@github.com:pac4j/pac4j.git</developerConnection>
 	</scm>
 
 	<developers>
@@ -73,6 +73,12 @@
 		<module>pac4j-http</module>
 		<module>pac4j-saml</module>
 		<module>pac4j-gae</module>
+		<module>pac4j-oidc</module>
+		<module>pac4j-jwt</module>
+		<module>pac4j-ldap</module>
+		<module>pac4j-sql</module>
+		<module>pac4j-mongo</module>
+		<module>pac4j-stormpath</module>
 	</modules>
 
 	<dependencyManagement>
@@ -93,6 +99,11 @@
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.pac4j</groupId>
+				<artifactId>pac4j-http</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.jasig.cas</groupId>
 				<artifactId>cas-server-webapp</artifactId>
 				<version>${cas.version}</version>
@@ -103,6 +114,11 @@
 				<artifactId>cas-server-support-oauth</artifactId>
 				<version>${cas.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>org.jasig.cas</groupId>
+                <artifactId>cas-server-integration-restlet</artifactId>
+                <version>${cas.version}</version>
+            </dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
@@ -121,12 +137,12 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
-				<version>2.0.6</version>
+				<version>2.5.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jasig.cas.client</groupId>
 				<artifactId>cas-client-core</artifactId>
-				<version>3.3.3</version>
+				<version>3.4.1</version>
 				<exclusions>
 					<exclusion>
 						<groupId>commons-logging</groupId>
@@ -135,19 +151,14 @@
 				</exclusions>
 			</dependency>
 			<dependency>
-				<groupId>org.opensaml</groupId>
-				<artifactId>opensaml</artifactId>
-				<version>2.5.1-1</version>
+				<groupId>org.jasig.cas.client</groupId>
+				<artifactId>cas-client-support-saml</artifactId>
+				<version>3.4.1</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
-				<version>1.7</version>
-			</dependency>
-			<dependency>
-				<groupId>xml-security</groupId>
-				<artifactId>xmlsec</artifactId>
-				<version>1.3.0</version>
+				<version>1.10</version>
 			</dependency>
 			<dependency>
 				<groupId>org.openid4java</groupId>
@@ -166,16 +177,56 @@
 				<version>3.0.1</version>
 				<scope>provided</scope>
 			</dependency>
-            <dependency>
-                <groupId>com.googlecode</groupId>
-                <artifactId>kryo</artifactId>
-                <version>1.04</version>
-            </dependency>
+			<dependency>
+				<groupId>com.esotericsoftware</groupId>
+				<artifactId>kryo-shaded</artifactId>
+				<version>3.0.3</version>
+			</dependency>
             <dependency>
                 <groupId>xml-apis</groupId>
                 <artifactId>xml-apis</artifactId>
                 <version>1.4.01</version>
             </dependency>
+			<dependency>
+				<groupId>org.pac4j</groupId>
+				<artifactId>pac4j-jwt</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nimbusds</groupId>
+				<artifactId>oauth2-oidc-sdk</artifactId>
+				<version>5.0-alpha5</version>
+			</dependency>
+			<dependency>
+				<groupId>com.nimbusds</groupId>
+				<artifactId>nimbus-jose-jwt</artifactId>
+				<version>4.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk15on</artifactId>
+				<version>1.51</version>
+			</dependency>
+			<dependency>
+				<groupId>org.ldaptive</groupId>
+				<artifactId>ldaptive</artifactId>
+				<version>1.0.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jdbi</groupId>
+				<artifactId>jdbi</artifactId>
+				<version>2.63</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mongodb</groupId>
+				<artifactId>mongo-java-driver</artifactId>
+				<version>3.0.3</version>
+			</dependency>
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>18.0</version>
+			</dependency>
 			<!-- for testing -->
 			<dependency>
 				<groupId>org.pac4j</groupId>
@@ -205,6 +256,12 @@
 				<version>1.9.21</version>
 			</dependency>
 			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${spring.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
 				<groupId>net.sourceforge.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>
 				<version>2.15</version>
@@ -218,7 +275,7 @@
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
 				<artifactId>logback-classic</artifactId>
-				<version>1.0.7</version>
+				<version>1.1.3</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -235,6 +292,24 @@
 				<artifactId>mockito-core</artifactId>
 				<version>1.9.5</version>
 			</dependency>
+			<dependency>
+				<groupId>com.unboundid</groupId>
+				<artifactId>unboundid-ldapsdk</artifactId>
+				<version>2.3.8</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.h2database</groupId>
+				<artifactId>h2</artifactId>
+				<version>1.4.187</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>de.flapdoodle.embed</groupId>
+				<artifactId>de.flapdoodle.embed.mongo</artifactId>
+				<version>1.48.2</version>
+				<scope>test</scope>
+			</dependency>
 			<!-- for testing -->
 		</dependencies>
 	</dependencyManagement>
@@ -249,6 +324,7 @@
 					<includes>
 						<include>**/Test*.java</include>
 						<include>**/*Test.java</include>
+						<include>**/*Tests.java</include>
 					</includes>
 				</configuration>
 			</plugin>
@@ -276,8 +352,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
@@ -312,6 +388,15 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
 					<version>2.5</version>
+					<configuration>
+						<archive>
+							<!-- configure plugin to use MANIFEST.MF
+                        	generated by maven-bundle-plugin -->
+							<manifestFile>
+								${project.build.outputDirectory}/META-INF/MANIFEST.MF
+							</manifestFile>
+						</archive>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -328,6 +413,21 @@
 					<artifactId>maven-bundle-plugin</artifactId>
 					<version>2.5.0</version>
 					<extensions>true</extensions>
+					<executions>
+						<execution>
+							<id>bundle-manifest</id>
+							<phase>process-classes</phase>
+							<goals>
+								<goal>manifest</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<!-- configure plugin to support jar packaging -->
+						<supportedProjectTypes>
+							<supportedProjectType>jar</supportedProjectType>
+						</supportedProjectTypes>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -364,7 +464,10 @@
 	</profiles>
 
 	<properties>
-		<cas.version>3.5.1</cas.version>
-		<slf4j.version>1.7.2</slf4j.version>
+		<spring.version>4.1.5.RELEASE</spring.version>
+		<cas.version>3.6.0</cas.version>
+		<slf4j.version>1.7.12</slf4j.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 </project>

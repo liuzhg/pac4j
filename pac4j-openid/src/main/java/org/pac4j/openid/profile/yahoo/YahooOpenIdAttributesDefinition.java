@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ public class YahooOpenIdAttributesDefinition extends AttributesDefinition {
     
     public static final String EMAIL = "email";
     public static final String LANGUAGE = "language";
-    public static final String FULLNAME = "display_name";
+    public static final String FULLNAME = "fullname";
     public static final String PROFILEPICTURE = "picture_url";
     
     public YahooOpenIdAttributesDefinition() {

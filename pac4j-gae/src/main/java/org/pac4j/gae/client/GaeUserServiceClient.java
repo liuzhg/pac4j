@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Patrice de Saint Steban
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,8 +15,8 @@
  */
 package org.pac4j.gae.client;
 
-import org.pac4j.core.client.BaseClient;
-import org.pac4j.core.client.Mechanism;
+import org.pac4j.core.client.IndirectClient;
+import org.pac4j.core.client.ClientType;
 import org.pac4j.core.client.RedirectAction;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.exception.RequiresHttpAction;
@@ -30,20 +30,19 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
 /**
- * This class is the OpenID client to authenticate users with UserService on App Engine
- * <p />
+ * <p>This class is the OpenID client to authenticate users with UserService on App Engine</p>
  * 
  * @author Patrice de Saint Steban
  * @since 1.6.0
  */
-public class GaeUserServiceClient extends BaseClient<GaeUserCredentials, GaeUserServiceProfile> {
+public class GaeUserServiceClient extends IndirectClient<GaeUserCredentials, GaeUserServiceProfile> {
 	UserService service;
 	String authDomain = null;
 	public GaeUserServiceClient() {
 		setName("GaeUserServiceClient");
 	}
 	@Override
-	protected BaseClient<GaeUserCredentials, GaeUserServiceProfile> newClient() {
+	protected IndirectClient<GaeUserCredentials, GaeUserServiceProfile> newClient() {
 		GaeUserServiceClient gaeUserServiceClient = new GaeUserServiceClient();
 		gaeUserServiceClient.setAuthDomain(authDomain);
 		return gaeUserServiceClient;
@@ -86,8 +85,8 @@ public class GaeUserServiceClient extends BaseClient<GaeUserCredentials, GaeUser
 	}
 
 	@Override
-	public Mechanism getMechanism() {
-		return Mechanism.GAE_MECHANISM;
+	public ClientType getClientType() {
+		return ClientType.GAE_PROVIDER;
 	}
 
 	@Override
@@ -98,7 +97,7 @@ public class GaeUserServiceClient extends BaseClient<GaeUserCredentials, GaeUser
 	
 	/**
 	 * Set the authDomain for connect to google apps for domain with the UserService
-	 * @param authDomain
+	 * @param authDomain the authentication domain
 	 */
 	public void setAuthDomain(String authDomain) {
 		this.authDomain = authDomain;

@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.pac4j.core.client;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.pac4j.core.context.WebContext;
@@ -26,16 +27,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is made to group multiple clients using a specific parameter to distinguish them, generally on one
- * callback url.
- * <p />
- * The {@link #init()} method is used to initialize the callback urls of the clients from the callback url of the
+ * <p>This class is made to group multiple clients using a specific parameter to distinguish them, generally on one
+ * callback url.</p>
+ * <p>The {@link #init()} method is used to initialize the callback urls of the clients from the callback url of the
  * clients group if empty and a specific parameter added to define the client targeted. It is implicitly called by the
- * "finders" methods and doesn't need to be called explicitly.
- * <p />
- * The {@link #findClient(WebContext)}, {@link #findClient(String)} or {@link #findClient(Class)} methods must be called
+ * "finders" methods and doesn't need to be called explicitly.</p>
+ * <p>The {@link #findClient(WebContext)}, {@link #findClient(String)} or {@link #findClient(Class)} methods must be called
  * to find the right client according to the input context or type. The {@link #findAllClients()} method returns all the
- * clients.
+ * clients.</p>
  * 
  * @author Jerome Leleu
  * @since 1.3.0
@@ -51,7 +50,7 @@ public final class Clients extends InitializableObject {
 
     private List<Client> clients;
 
-    private String callbackUrl;
+    private String callbackUrl = null;
 
     public Clients() {
     }
@@ -66,24 +65,42 @@ public final class Clients extends InitializableObject {
         setClients(clients);
     }
 
+    public Clients(final List<Client> clients) {
+        setClientsList(clients);
+    }
+
+    public Clients(final Client... clients) {
+        setClients(clients);
+    }
+
     /**
-     * Initialize all clients by computing callback urls.
+     * Initialize all clients by computing callback urls if necessary.
      */
     @Override
     protected void internalInit() {
-        CommonHelper.assertNotBlank("callbackUrl", this.callbackUrl);
         CommonHelper.assertNotNull("clients", this.clients);
+        final HashSet<String> names = new HashSet<>();
         for (final Client client : this.clients) {
-            final BaseClient baseClient = (BaseClient) client;
-            final String baseClientCallbackUrl = baseClient.getCallbackUrl();
-            // no callback url defined for the client -> set it with the group callback url + the "clientName" parameter
-            if (baseClientCallbackUrl == null) {
-                baseClient.setCallbackUrl(CommonHelper.addParameter(this.callbackUrl, this.clientNameParameter,
-                        baseClient.getName()));
-                // a callback url is already defined for the client without the "clientName" parameter -> just add it
-            } else if (baseClientCallbackUrl.indexOf(this.clientNameParameter + "=") < 0) {
-                baseClient.setCallbackUrl(CommonHelper.addParameter(baseClientCallbackUrl, this.clientNameParameter,
-                        baseClient.getName()));
+            final String name = client.getName();
+            if (names.contains(name)) {
+                throw new TechnicalException("Duplicate name in clients: " + name);
+            }
+            names.add(name);
+            if (CommonHelper.isNotBlank(this.callbackUrl) && client instanceof IndirectClient) {
+                final IndirectClient indirectClient = (IndirectClient) client;
+                String indirectClientCallbackUrl = indirectClient.getCallbackUrl();
+                // no callback url defined for the client -> set it with the group callback url
+                if (indirectClientCallbackUrl == null) {
+                    indirectClient.setCallbackUrl(this.callbackUrl);
+                    indirectClientCallbackUrl = this.callbackUrl;
+                }
+                // if the "client_name" parameter is not already part of the callback url, add it unless the client
+                // has indicated to not include it.
+                if (indirectClient.isIncludeClientNameInCallbackUrl() &&
+                        indirectClientCallbackUrl.indexOf(this.clientNameParameter + "=") < 0) {
+                    indirectClient.setCallbackUrl(CommonHelper.addParameter(indirectClientCallbackUrl, this.clientNameParameter,
+                            name));
+                }
             }
         }
     }
@@ -91,7 +108,7 @@ public final class Clients extends InitializableObject {
     /**
      * Return the right client according to the web context.
      * 
-     * @param context
+     * @param context web context
      * @return the right client
      */
     public Client findClient(final WebContext context) {
@@ -103,7 +120,7 @@ public final class Clients extends InitializableObject {
     /**
      * Return the right client according to the specific name.
      * 
-     * @param name
+     * @param name name of the client
      * @return the right client
      */
     public Client findClient(final String name) {
@@ -121,7 +138,8 @@ public final class Clients extends InitializableObject {
     /**
      * Return the right client according to the specific class.
      *
-     * @param clazz
+     * @param clazz class of the client
+     * @param <C> the kind of client
      * @return the right client
      */
     @SuppressWarnings("unchecked")

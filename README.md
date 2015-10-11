@@ -1,472 +1,165 @@
 <p align="center">
-  <img src="http://www.pac4j.org/img/logo.png" />
+  <img src="https://pac4j.github.io/pac4j/img/logo.png" width="300" />
 </p>
 
-- [What is pac4j ?](#what-is-pac4j--)
-- [The "big picture"](#the-big-picture)
-- [Sequence diagram (example: CAS)](#sequence-diagram-example-cas)
-- [Technical description](#technical-description)
-    - [pac4j-core](#pac4j-core)
-    - [pac4j-oauth](#pac4j-oauth)
-    - [pac4j-cas](#pac4j-cas)
-    - [pac4j-http](#pac4j-http)
-    - [pac4j-openid](#pac4j-openid)
-    - [pac4j-saml](#pac4j-saml)
-    - [pac4j-gae](#pac4j-gae)
-    - [pac4j-test-cas](#pac4j-test-cas)
-- [Providers supported](#providers-supported)
-- [Code sample](#code-sample)
-    - [Maven dependencies](#maven-dependencies)
-    - [OAuth support](#oauth-support)
-    - [CAS support](#cas-support)
-    - [HTTP support](#http-support)
-    - [OpenID support](#openid-support)
-    - [SAML support](#saml-support)
-    - [Multiple clients](#multiple-clients)
-    - [Error handling](#error-handling)
-    - [Authorizations](#authorizations)
-- [Libraries built with pac4j](#libraries-built-with-pac4j)
-- [Versions](#versions)
-- [Testing](#testing)
-- [Bugs / Features tracking](#bugs--features-tracking)
-- [Contact](#contact)
+`pac4j` is a **Java security engine** to authenticate users, get their profiles and manage their authorizations in order to secure your Java web applications. It's available under the Apache 2 license.
 
+It is currently **available for many frameworks / tools and supports many authentication mechanisms**. See the [big picture](https://github.com/pac4j/pac4j/wiki/The-big-picture).
 
-## What is pac4j ? [![Build Status](https://travis-ci.org/leleuj/pac4j.png?branch=master)](https://travis-ci.org/leleuj/pac4j)
+Its core API is provided by the `pac4j-core` submodule (groupId: `org.pac4j`).
 
-**pac4j** is a Profile & Authentication Client for Java (it's a global rebuilding of the *scribe-up* library). It targets all the authentication mechanisms supporting the following flow:
 
-1. From the client application, redirect the user to the "provider" for authentication (HTTP 302)
-2. After successful authentication, redirect back the user from the "provider" to the client application (HTTP 302) and get the user credentials
-3. With these credentials, get the profile of the authenticated user (direct call from the client application to the "provider").
+## Frameworks / tools implementing `pac4j`:
 
-It has a **very simple and unified API** to support these 6 authentication mechanisms on client side:
-
-1. OAuth (1.0 & 2.0)
-2. CAS (1.0, 2.0, SAML, logout & proxy)
-3. HTTP (form & basic auth authentications)
-4. OpenID
-5. SAML (2.0)
-6. Google App Engine UserService.
-
-There are 7 libraries implementing **pac4j** for the following environments:
-
-1. the CAS server (using the *cas-server-support-pac4j* library)
-2. the Play 2.x framework (using the *play-pac4j_java* and *play-pac4j_scala* libraries)
-3. any basic J2E environment (using the *j2e-pac4j* library)
-4. the Apache Shiro library (using the *buji-pac4j* library)
-5. the Spring Security library (using the *spring-security-pac4j* library)
-6. the Ratpack JVM toolkit (using the *ratpack-pac4j* module)
-7. the Vertx framework (using the *vertx-pac4j* module).
-
-It's available under the Apache 2 license.
-
-
-## The "big picture"
-
-<img src="http://www.pac4j.org/img/pac4j.png" />
-
-
-## Sequence diagram (example: CAS)
-
-<img src="http://www.pac4j.org/img/sequence_diagram.jpg" />
-
-
-## Technical description
-
-This Maven project is composed of 6 modules:
-
-#### pac4j-core
-
-This is the core module of the project with the core classes/interfaces:
-
-* the *Client* interface is the **main API of the project** as it defines the mechanism that all clients must follow: redirect(WebContext,boolean,boolean), getCredentials(WebContext) and getUserProfile(Credentials,WebContext)
-* the *Credentials* class is the base class for all credentials
-* the *UserProfile* class is the base class for all user profiles (it is associated with attributes definition and converters)
-* the *CommonProfile* class inherits from the *UserProfile* class and implements all the common getters that profiles must have (getFirstName(), getEmail()...)
-* the *WebContext* interface represents a web context which can be implemented in a J2E or another environment.
-
-#### pac4j-oauth
-
-This module is dedicated to OAuth client support, it's the successor of the <b>scribe-up</b> library:
-
-* the *FacebookClient*, *TwitterClient*... classes are the clients for all the providers: Facebook, Twitter...
-* the *OAuthCredentials* class is the credentials for OAuth support
-* the *FacebookProfile*, *TwitterProfile*... classes are the associated profiles, returned by the clients.
-
-This module is based on the **pac4j-core** module, the [scribe-java](https://github.com/fernandezpablo85/scribe-java) library for OAuth protocol support, the [Jackson](https://github.com/FasterXML/jackson-core) library for JSON parsing and the [commons-lang3](http://commons.apache.org/lang/) library.
-
-#### pac4j-cas
-
-This module is dedicated to CAS client support:
-
-* the *CasClient* class is the client for CAS server (the *CasProxyReceptor* is dedicated to CAS proxy support)
-* the *CasCredentials* class is the credentials for CAS support
-* the *CasProfile* class is the user profile returned by the *CasClient*.
-
-This module is based on the **pac4j-core** module and the [Jasig CAS client](https://github.com/Jasig/java-cas-client).
-
-#### pac4j-http
-
-This module is dedicated to HTTP protocol support:
-
-* the *FormClient* & *BasicAuthClient* classes are the client for form and basic auth authentications
-* the *UsernamePasswordCredentials* class is the username/password credentials in HTTP support
-* the *HttpProfile* class is the user profile returned by the *FormClient* and *BasicAuthClient*.
-
-This module is based on the **pac4j-core** module and the [commons-codec](http://commons.apache.org/codec/) library.
-
-#### pac4j-openid
-
-This module is dedicated to OpenID protocol support:
-
-* the *YahooOpenIdClient* is the client for Yahoo
-* the *OpenIdCredentials* class is the credentials for OpenID support
-* the *YahooOpenIdProfile* class is the associated profile, returned by the client.
-
-This module is based on the **pac4j-core** module and the [openid4java](http://code.google.com/p/openid4java/) library.
-
-#### pac4j-saml
-
-This module is dedicated to SAML support:
-
-* the *Saml2Client* class is the client for integrating with a SAML2 compliant Identity Provider
-* the *Saml2Credentials* class is the credentials for SAML2 support
-* the *Saml2Profile* class is the user profile returned by the *Saml2Client*.
-
-This module is based on the **pac4j-core** module and the [OpenSAML library](https://wiki.shibboleth.net/confluence/display/OpenSAML/Home).
-
-In case you use the library against Microsoft ADFS (Active Directory Federation Services), a SAML Identity Provider server, please have a look into
-file README-ADFS.txt for details on how to setup your client.
-
-#### pac4j-test-cas
-
-This module is made to test CAS support in pac4j.
-
-Learn more by browsing the [Javadoc](http://www.pac4j.org/apidocs/pac4j/index.html).
-
-#### pac4j-gae
-
-This module is dedicated to Gae connexion login mechanism support:
-
-* the *GaeUserServiceClient* is the client for Gae
-* the *GaeUserServiceCredentials* class is the credentials for gae support
-* the *GaeUserServiceProfile* class is the associated profile, returned by the client.
-
-This module is based on the **pac4j-core** module and the [Google App Engine API](http://appengine.google.com) library.
-
-
-## Providers supported
-
-<table>
-<tr><th>Provider</th><th>Protocol</th><th>Maven dependency</th><th>Client class</th><th>Profile class</th></tr>
-<tr><td>CAS server</td><td>CAS</td><td>pac4j-cas</td><td>CasClient & CasProxyReceptor</td><td>CasProfile</td></tr>
-<tr><td>CAS server using OAuth Wrapper</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>CasOAuthWrapperClient</td><td>CasOAuthWrapperProfile</td></tr>
-<tr><td>DropBox</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>DropBoxClient</td><td>DropBoxProfile</td></tr>
-<tr><td>Facebook</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>FacebookClient</td><td>FacebookProfile</td></tr>
-<tr><td>GitHub</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>GitHubClient</td><td>GitHubProfile</td></tr>
-<tr><td>Google</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>Google2Client</td><td>Google2Profile</td></tr>
-<tr><td>LinkedIn</td><td>OAuth 1.0 & 2.0</td><td>pac4j-oauth</td><td>LinkedInClient & LinkedIn2Client</td><td>LinkedInProfile & LinkedIn2Profile</td></tr>
-<tr><td>Twitter</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>TwitterClient</td><td>TwitterProfile</td></tr>
-<tr><td>Windows Live</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>WindowsLiveClient</td><td>WindowsLiveProfile</td></tr>
-<tr><td>WordPress</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>WordPressClient</td><td>WordPressProfile</td></tr>
-<tr><td>Yahoo</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>YahooClient</td><td>YahooProfile</td></tr>
-<tr><td>PayPal</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>PayPalClient</td><td>PayPalProfile</td></tr>
-<tr><td>Vk</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>VkClient</td><td>VkProfile</td></tr>
-<tr><td>Foursquare</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>FoursquareClient</td><td>FoursquareProfile</td></tr>
-<tr><td>Bitbucket</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>BitbucketClient</td><td>BitbucketProfile</td></tr>
-<tr><td>ORCiD</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>OrcidClient</td><td>OrcidProfile</td></tr>
-<tr><td>Web sites with basic auth authentication</td><td>HTTP</td><td>pac4j-http</td><td>BasicAuthClient</td><td>HttpProfile</td></tr>
-<tr><td>Web sites with form authentication</td><td>HTTP</td><td>pac4j-http</td><td>FormClient</td><td>HttpProfile</td></tr>
-<tr><td>Google - Deprecated</td><td>OpenID</td><td>pac4j-openid</td><td>GoogleOpenIdClient</td><td>GoogleOpenIdProfile</td></tr>
-<tr><td>Yahoo</td><td>OpenID</td><td>pac4j-openid</td><td>YahooOpenIdClient</td><td>YahooOpenIdProfile</td></tr>
-<tr><td>SAML Identity Provider</td><td>SAML 2.0</td><td>pac4j-saml</td><td>Saml2Client</td><td>Saml2Profile</td></tr>
-<tr><td>Google App Engine User Service</td><td>Gae User Service Mechanism</td><td>pac4j-gae</td><td>GaeUserServiceClient</td><td>GaeUserServiceProfile</td></tr>
-</table>
-
-
-## Code sample
-
-### Maven dependencies
-
-First, you have define the right dependency: pac4j-oauth for OAuth support or/and pac4j-cas for CAS support or/and pac4j-http for HTTP support or/and pac4j-openid for OpenID support or/and pac4j-saml for SAML support or/and pac4j-gae for Google App Engine support.
-For example:
-
-    <dependency>
-      <groupId>org.pac4j</groupId>
-      <artifactId>pac4j-oauth</artifactId>
-      <version>1.6.0</version>
-    </dependency>
-
-As the pac4j snapshots libraries are stored in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), this repository may need be added in the Maven *pom.xml* file:
-
-    <repository>
-      <id>sonatype-nexus-snapshots</id>
-	  <name>Sonatype Nexus Snapshots</name>
-	  <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-	  <releases>
-	    <enabled>false</enabled>
-	  </releases>
-	  <snapshots>
-	    <enabled>true</enabled>
-	  </snapshots>
-    </repository>
-
-### OAuth support
-
-If you want to authenticate and get the user profile from Facebook, you have to use the *org.pac4j.oauth.client.FacebookClient*:
-
-    // declare the client (use default scope and fields)
-    FacebookClient client = new FacebookClient(MY_KEY, MY_SECRET);
-    // define the client application callback url
-    client.setCallbackUrl("http://myserver/myapp/callbackUrl");
-    // send the user to Facebook for authentication and permissions
-    WebContext context = new J2EContext(request, response);
-    client.redirect(context, false, false);
-
-...after successful authentication, in the client application, on the callback url (for Facebook)...
-
-    // get OAuth credentials
-    OAuthCredentials credentials = client.getCredentials(context);
-    // get the facebook profile
-    FacebookProfile facebookProfile = client.getUserProfile(credentials, context);
-    System.out.println("Hello: " + facebookProfile.getDisplayName() + " born the " + facebookProfile.getBirthday());</code></pre>
-
-### CAS support
-
-For integrating an application with a CAS server, you should use the *org.pac4j.cas.client.CasClient*:
-
-    // declare the client
-    CasClient client = new CasClient();
-    // define the client application callback url
-    client.setCallbackUrl("http://myserver/myapp/callbackUrl");
-    // send the user to the CAS server for authentication
-    WebContext context = new J2EContext(request, response);
-    client.redirect(context, false, false);
-
-...after successful authentication, in the client application, on the callback url...
-
-    // get CAS credentials
-    CasCredentials credentials = client.getCredentials(context);
-    // get the CAS profile
-    CasProfile casProfile = client.getUserProfile(credentials, context);
-    System.out.println("Hello: " + casProfile.getAttribute("anAttribute"));</code></pre>
-
-For proxy support, the *org.pac4j.cas.client.CasProxyReceptor* class must be used (on the same or new callback url) and declared within the *CasClient* class:
-
-    casClient.setCasProxyReceptor(new CasProxyReceptor());
-    // casClient.setAcceptAnyProxy(false);
-    // casClient.setAllowedProxyChains(proxies);
-
-In this case, the *org.pac4j.cas.profile.CasProxyProfile* must be used to get proxy tickets for other CAS services:
-
-    CasProxyProfile casProxyProfile = (CasProxyProfile) casProfile;
-    String proxyTicket = casProxyProfile.getProxyTicketFor(anotherCasService);
-
-### HTTP support
-
-To use form authentication in a web application, you should use the *org.pac4j.http.client.FormClient* class:
-
-    // declare the client
-    FormClient client = new FormClient("/myloginurl", new MyUsernamePasswordAuthenticator());
-    client.setCallbackUrl("http://myserver/myapp/callbackUrl");
-    // send the user to the form for authentication
-    WebContext context = new J2EContext(request, response);
-    client.redirect(context, false, false);
-
-...after successful authentication...
-
-    // get username/password credentials
-    UsernamePasswordCredentials credentials = client.getCredentials(context);
-    // get the HTTP profile
-    HttpProfile httpProfile = client.getUserProfile(credentials, context);
-    System.out.println("Hello: " + httpProfile.getUsername());</code></pre>
-
-To use basic auth authentication in a web application, you should use the *org.pac4j.http.client.BasicAuthClient* class the same way:
-
-    // declare the client
-    BasicAuthClient client = new BasicAuthClient(new MyUsernamePasswordAuthenticator(), new UsernameProfileCreator());
-
-### OpenID support
-
-To use Google and OpenID for authentication, you should use the *org.pac4j.openid.client.GoogleOpenIdClient* class:
-
-    // declare the client
-    GoogleOpenIdClient client = new GoogleOpenIdClient();
-    client.setCallbackUrl("/callbackUrl");
-    // send the user to Google for authentication
-    WebContext context = new J2EContext(request, response);
-    // we assume the user identifier is in the "openIdUser" request parameter
-    client.redirect(context, false, false);
-
-...after successful authentication, in the client application, on the callback url...
-
-    // get the OpenID credentials
-    OpenIdCredentials credentials = client.getCredentials(context);
-    // get the GooglOpenID profile
-    GoogleOpenIdProfile profile = client.getUserProfile(credentials, context);
-    System.out.println("Hello: " + profile.getDisplayName());
-
-### SAML support
-
-For integrating an application with a SAML2 Identity Provider server, you should use the *org.pac4j.saml.client.Saml2Client*:
-
-    //Generate a keystore for all signature and encryption stuff:
-    keytool -genkeypair -alias pac4j-demo -keypass pac4j-demo-passwd -keystore samlKeystore.jks -storepass pac4j-demo-passwd -keyalg RSA -keysize 2048 -validity 3650
-
-    // declare the client
-    Saml2Client client = new Saml2Client();
-    // configure keystore
-    client.setKeystorePath("samlKeystore.jks");
-    client.setKeystorePassword("pac4j-demo-passwd");
-    client.setPrivateKeyPassword("pac4j-demo-passwd");
-    // Configure a file containing the Identity Provider (IDP) metadata.
-    // It is the IDP's responsibility to make its metadata freely accessible.
-    client.setIdpMetadataPath("testshib-providers.xml");
-    // Configure the callback url either directly or with the Clients container
-    // The callback url will be the SP entity ID
-    client.setCallbackUrl("http://localhost:8080/callback");
-
-    // generate pac4j SAML2 Service Provider metadata to import on Identity Provider side
-    String spMetadata = client.printClientMetadata();
-
-    // send the user to the Identity Provider server for authentication
-    WebContext context = new J2EContext(request, response);
-    client.redirect(context, false, false);
-
-...after successful authentication, in the Service Provider application, on the assertion consumer service url...
-
-    // get SAML2 credentials
-    Saml2Credentials credentials = client.getCredentials(context);
-    // get the SAML2 profile
-    Saml2Profile saml2Profile = client.getUserProfile(credentials, context);
-
-#### Additional configuration:
-
-Once you have an authenticated web session on the Identity Provider, usually it won't prompt you again to enter your credentials and it will automatically generate you a new assertion. By default, the SAML pac4j client will accept assertions based on a previous authentication for one hour. If you want to change this behaviour, set the maximumAuthenticationLifetime parameter:
-
-    // Lifetime in seconds
-    client.setMaximumAuthenticationLifetime(600);
-
-By default, the entity ID of your application (the Service Provider) will be equals to the pac4j callback url. This can lead to problems with some IDP because of the query string not being accepted (like ADFS2.0). You can force your own entity ID with the spEntityId parameter:
-
-    // custom SP entity ID
-    client.setSpEntityId("http://localhost:8080/callback");
-
-### Gae User Service support
-
-To use the Google App Engine authentication, you should use the *org.pac4j.gae.client.GaeUserServiceClient* class:
-
-    // declare the client
-    GaeUserServiceClient client = new GaeUserServiceClient();
-    client.setCallbackUrl("/callbackUrl");
-    // send the user to Google for authentication
-    WebContext context = new J2EContext(request, response);
-    client.redirect(context, false, false);
-
-...after successful authentication, in the client application, on the callback url...
-
-    // get the OpenID credentials
-    GaeUserServiceCredentials credentials = client.getCredentials(context);
-    // get the GooglOpenID profile
-    GaeUserServiceProfile profile = client.getUserProfile(credentials, context);
-    System.out.println("Hello: " + profile.getDisplayName());
-
-### Multiple clients
-
-If you use multiple clients, you can use more generic objects. All profiles inherit from the *org.pac4j.core.profile.CommonProfile* class:
-
-    // get credentials
-    Credentials credentials = client.getCredentials(context);
-    // get the common profile
-    CommonProfile commonProfile = client.getUserProfile(credentials, context);
-    System.out.println("Hello: " + commonProfile.getFirstName());
-
-If you want to interact more with the OAuth providers (like Facebook), you can retrieve the access token from the (OAuth) profiles:
-
-    OAuthProfile oauthProfile = (OAuthProfile) commonProfile;
-    String accessToken = oauthProfile.getAccessToken();
-    // or
-    String accesstoken = facebookProfile.getAccessToken();
-
-You can also group all clients on a single callback url by using the *org.pac4j.core.client.Clients* class:
-
-    Clients clients = new Clients("http://server/app/callbackUrl", fbClient, casClient, formClient googleOpenIdClient, samlClient);
-    // on the callback url, retrieve the right client
-    Client client = clients.findClient(context);
-
-### Error handling
-
-All methods of the clients may throw an unchecked *org.pac4j.core.exception.TechnicalException*, which could be trapped by an appropriate try/catch.
-The *getRedirectionUrl(WebContext,boolean,boolean)* and the *getCredentials(WebContext)* methods may also throw a checked *org.pac4j.core.exception.RequiresHttpAction*, to require some additionnal HTTP action (redirection, basic auth...)
-
-### Authorizations
-
-Although the primary target of the pac4j library is to deal with authentication, authorizations can be handled as well.
-
-After a successful authentication at a provider, the associated client can generate roles, permissions and a "remembered" status. These information are available in every user profile.
-
-The generation of this information is controlled by a class implementing the *org.pac4j.core.authorization.AuthorizationGenerator* interface and set for this client.
-
-    FromAttributesAuthorizationGenerator authGenerator = new FromAttributesAuthorizationGenerator(new String[]{"attribRole1"}, new String[]{"attribPermission1"})
-    client.setAuthorizationGenerator(authGenerator);
-
-
-## Libraries built with pac4j
-
-Even if you can use **pac4j** on its own, this library is used to be integrated with:
-
-1. the [cas-server-support-pac4j](https://wiki.jasig.org/pages/viewpage.action?pageId=57577635) module to add multi-protocols client support to the [CAS server](http://www.jasig.org/cas)
-2. the [play-pac4j](https://github.com/leleuj/play-pac4j) library to add multi-protocols client support to the [Play 2.x framework](http://www.playframework.org/) in Java and Scala
-2. the [j2e-pac4j](https://github.com/leleuj/j2e-pac4j) library to add multi-protocols client support to the [J2E environment](http://docs.oracle.com/javaee/)
-3. the [buji-pac4j](https://github.com/bujiio/buji-pac4j) library to add multi-protocols client support to the [Apache Shiro project](http://shiro.apache.org)
-4. the [spring-security-pac4j](https://github.com/leleuj/spring-security-pac4j) library to add multi-protocols client support to [Spring Security](http://static.springsource.org/spring-security/site/)
-5. the [ratpack-pac4j](https://github.com/ratpack/ratpack/tree/master/ratpack-pac4j) module to add multi-protocols client support to [Ratpack](http://www.ratpack.io/)
-6. the [vertx-pac4j](https://github.com/pac4j/vertx-pac4j) module to add multi-protocols client support to [Vertx](http://vertx.io/)
-
-<table>
-<tr><th>Integration library</th><th>Protocol(s) supported</th><th>Based on</th><th>Demo webapp</th></tr>
-<tr><td>cas-server-support-pac4j 4.0.0</td><td>OAuth / CAS / OpenID</td><td>pac4j 1.4.1</td><td><a href="https://github.com/leleuj/cas-pac4j-oauth-demo">cas-pac4-oauth-demo</a></td></tr>
-<tr><td>play-pac4j 1.3.0 / 1.2.2 / 1.1.4</td><td>OAuth / CAS / OpenID / HTTP / SAML / GAE</td><td>pac4j 1.6.0</td><td><a href="https://github.com/leleuj/play-pac4j-java-demo">play-pac4j-java-demo</a><br /><a href="https://github.com/leleuj/play-pac4j-scala-demo">play-pac4j-scala-demo</a></td></tr>
-<tr><td>j2e-pac4j 1.0.4</td><td>OAuth / CAS / OpenID / HTTP / SAML / GAE</td><td>pac4j 1.6.0</td><td><a href="https://github.com/leleuj/j2e-pac4j-demo">j2e-pac4j-demo</a></td></tr>
-<tr><td>buji-pac4j 1.3.0</td><td>OAuth / CAS / OpenID / HTTP / SAML / GAE</td><td>pac4j 1.6.0</td><td><a href="https://github.com/leleuj/buji-pac4j-demo">buji-pac4j-demo</a></td></tr>
-<tr><td>spring-security-pac4j 1.2.4</td><td>OAuth / CAS / OpenID / HTTP / SAML / GAE</td><td>pac4j 1.6.0</td><td><a href="https://github.com/leleuj/spring-security-pac4j-demo">spring-security-pac4j-demo</a></td></tr>
-<tr><td>ratpack 0.9.7</td><td>OAuth / CAS / OpenID / HTTP</td><td>pac4j 1.5.1</td><td><a href="https://github.com/leleuj/ratpack-pac4j-demo">ratpack-pac4j-demo</a></td></tr>
-<tr><td>vertx-pac4j 1.0.0</td><td>OAuth / CAS / OpenID / HTTP / SAML / GAE</td><td>pac4j 1.6.0</td><td><a href="https://github.com/pac4j/vertx-pac4j-demo">vertx-pac4j-demo</a></td></tr>
-</table>
-
-
-## Versions
-
-The current version **1.6.1-SNAPSHOT** is under development.  
-The build is done on Travis: [https://travis-ci.org/leleuj/pac4j](https://travis-ci.org/leleuj/pac4j).
-The generated artifacts are available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency.
-
-The last released version is the **1.6.0**:
-
-    <dependency>
-        <groupId>org.pac4j</groupId>
-        <artifactId>pac4j-core</artifactId>
-        <version>1.6.0</version>
-    </dependency>
-
-See the [release notes](https://github.com/leleuj/pac4j/wiki/Versions).
-
-
-
-## Testing
-
-pac4j is tested by more than 400:
-- unit and bench tests launched by *mvn test*
-- integration tests (authentication processes are fully simulated using the [HtmlUnit](http://htmlunit.sourceforge.net/) library) launched by *mvn verify*.
-
-
-## Bugs / Features tracking
-
-Bugs and new features can now be tracked using [JIRA](https://pac4jos.atlassian.net/secure/Dashboard.jspa?selectPageId=10100).
-
-
-## Contact
+| The framework / tool you develop with | The `*-pac4j` library you must use | The demo(s) for tests
+|---------------------------------------|------------------------------------|----------------------
+| [J2E environment](http://docs.oracle.com/javaee/) | [j2e-pac4j](https://github.com/pac4j/j2e-pac4j) | [j2e-pac4j-demo](https://github.com/pac4j/j2e-pac4j-demo)
+| [Play 2.x framework](http://www.playframework.org) | [play-pac4j](https://github.com/pac4j/play-pac4j) | [play-pac4j-java-demo](https://github.com/pac4j/play-pac4j-java-demo) or [play-pac4j-scala-demo](https://github.com/pac4j/play-pac4j-scala-demo)
+| [Vertx](http://vertx.io) | [vertx-pac4j](https://github.com/pac4j/vertx-pac4j) | [vertx-pac4j-demo](https://github.com/pac4j/vertx-pac4j-demo)
+| [Spark Java framework](http://sparkjava.com) | [spark-pac4j](https://github.com/pac4j/spark-pac4j) | [spark-pac4j-demo](https://github.com/pac4j/spark-pac4j-demo)
+| [Ratpack](http://www.ratpack.io) | [ratpack-pac4j](http://ratpack.io/manual/current/pac4j.html#pac4j) | [ratpack-pac4j-demo](https://github.com/pac4j/ratpack-pac4j-demo)
+| [Undertow](http://undertow.io) | [undertow-pac4j](https://github.com/pac4j/undertow-pac4j) | [undertow-pac4j-demo](https://github.com/pac4j/undertow-pac4j-demo)
+| [Jooby framework](http://jooby.org) |  [jooby-pac4j](http://jooby.org/doc/pac4j) | [jooby-pac4j-demo](https://github.com/pac4j/jooby-pac4j-demo)
+| [Apache Shiro](http://shiro.apache.org) | [buji-pac4j](https://github.com/bujiio/buji-pac4j) | [buji-pac4j-demo](https://github.com/pac4j/buji-pac4j-demo)
+| [Spring Security](http://projects.spring.io/spring-security) | [spring-security-pac4j](https://github.com/pac4j/spring-security-pac4j) | [spring-security-pac4j-demo](https://github.com/pac4j/spring-security-pac4j-demo)
+| [SSO CAS server](https://github.com/Jasig/cas) | [cas-server-support-pac4j](http://jasig.github.io/cas/4.1.x/integration/Delegate-Authentication.html) | [cas-pac4j-oauth-demo](https://github.com/leleuj/cas-pac4j-oauth-demo)
+
+
+## Supported authentication / authorization mechanisms:
+
+`pac4j` supports most authentication mechanisms, called [**clients**](https://github.com/pac4j/pac4j/wiki/Clients):
+
+- **indirect / stateful clients** are for UI when the user authenticates once at an external provider (like Facebook, a CAS server...) or via a local form (or basic auth popup)  
+- **direct / stateless clients** are for web services when credentials (like basic auth, tokens...) are passed for each HTTP request.
+
+See the [authentication flows](https://github.com/pac4j/pac4j/wiki/Authentication-flows).
+
+| The authentication mechanism you want | The `pac4j-*` submodule you must use
+|---------------------------------------|-------------------------------------
+| OAuth (1.0 & 2.0): Facebook, Twitter, Google, Yahoo, LinkedIn, Github... | `pac4j-oauth`
+| CAS (1.0, 2.0, 3.0, SAML, logout, proxy, REST) | `pac4j-cas`
+| HTTP (form, basic auth, IP, header, cookie, GET/POST parameter) | `pac4j-http`
+| OpenID | `pac4j-openid`
+| SAML (2.0) | `pac4j-saml`
+| Google App Engine UserService | `pac4j-gae`
+| OpenID Connect (1.0) | `pac4j-oidc`
+| JWT | `pac4j-jwt`
+| LDAP | `pac4j-ldap`
+| Relational DB | `pac4j-sql`
+| MongoDB | `pac4j-mongo`
+| Stormpath | `pac4j-stormpath`
+
+`pac4j` supports many authorization checks, called [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) available in the `pac4j-core` and `pac4j-http` submodules: role / permission checks, CSRF token validation...
+
+
+## How to develop you own `pac4j` implementation for your framework / tool?
+
+### Versions
+
+The current version **1.8.0-RC2-SNAPSHOT** is under development. Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/pac4j.png?branch=master)](https://travis-ci.org/pac4j/pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). See the [tests strategy](https://github.com/pac4j/pac4j/wiki/Tests).
+
+The source code can be cloned and locally built via Maven:
+
+```shell
+git clone git@github.com:pac4j/pac4j.git
+cd pac4j
+mvn clean install -DskipITs
+```
+
+The latest released version is the [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pac4j/pac4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pac4j/pac4j), available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j-). See the [release notes](https://github.com/pac4j/pac4j/wiki/Versions).
+
+### Implementations
+
+`pac4j` is an easy and powerful security engine. Add the `pac4j-core` dependency to benefit from the core API of `pac4j`. Other dependencies will be optionally added for specific support: `pac4j-oauth` for OAuth, `pac4j-cas` for CAS, `pac4j-saml` for SAML...
+
+To secure your Java web application, **the reference implementation is to create two filters**: **one to protect urls**, **the other one to receive callbacks** for stateful authentication processes ("indirect clients").
+
+Gather all your authentication mechanisms = [**clients**](https://github.com/pac4j/pac4j/wiki/Clients) via the `Clients` class (to share the same callback url). Also define your [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) to check authorizations and aggregate both (clients and authorizers) on the `Config`:
+
+```java
+FacebookClient facebookClient = new FacebookClient(FB_KEY, FB_SECRET);
+TwitterClient twitterClient = new TwitterClient(TW_KEY, TW_SECRET);
+FormClient formClient = new FormClient("http://localhost:8080/theForm.jsp", new SimpleTestUsernamePasswordAuthenticator(), new UsernameProfileCreator());
+CasClient casClient = new CasClient();
+casClient.setCasLoginUrl("http://mycasserver/login");
+Clients clients = new Clients("http://localhost:8080/callback", facebookClient, twitterClient, formClient, casClient);
+Config config = new Config(clients);
+config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"));
+config.addAuthorizer("custom", new CustomAuthorizer());
+```
+
+1) **For your protection filter, use the following logic (loop on direct clients for authentication then check the user profile and authorizations)**:
+
+```java
+EnvSpecificWebContext context = new EnvSpecificWebContex(...);
+Clients configClients = config.getClients();
+List<Client> currentClients = clientFinder.find(configClients, context, clientName);
+
+boolean useSession = useSession(context, currentClients);
+ProfileManager manager = new ProfileManager(context);
+UserProfile profile = manager.get(useSession);
+
+if (profile == null && currentClients != null && currentClients.size() > 0) {
+  for (final Client currentClient: currentClients) {
+    if (currentClient instanceof DirectClient) {
+      final Credentials credentials;
+      try {
+        credentials = currentClient.getCredentials(context);
+      } catch (RequiresHttpAction e) { ... }
+      profile = currentClient.getUserProfile(credentials, context);
+      if (profile != null) {
+        manager.save(useSession, profile);
+        break;
+      }
+    }
+  }
+}
+
+if (profile != null) {
+  if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
+    grantAccess();
+  } else {
+    forbidden(context, currentClients, profile);
+  }
+} else {
+  if (startAuthentication(context, currentClients)) {
+    saveRequestedUrl(context, currentClients);
+    redirectToIdentityProvider(context, currentClients);
+  } else {
+    unauthorized(context, currentClients);
+  }
+}
+```
+
+The `EnvSpecificWebContext` class is a specific implementation of the `WebContext` interface for your framework.
+
+See the final implementations in [j2e-pac4j](https://github.com/pac4j/j2e-pac4j/blob/master/src/main/java/org/pac4j/j2e/filter/RequiresAuthenticationFilter.java#L91) and [play-pac4j](https://github.com/pac4j/play-pac4j/blob/master/play-pac4j-java/src/main/java/org/pac4j/play/java/RequiresAuthenticationAction.java#L95).
+
+2) **For your callback filter, get the credentials and the user profile on the callback url**:
+
+```java
+EnvSpecificWebContext context = new EnvSpecificWebContex(...);
+Clients clients = config.getClients();
+Client client = clients.findClient(context);
+
+Credentials credentials;
+try {
+  credentials = client.getCredentials(context);
+} catch (RequiresHttpAction e) {
+  handleSpecialHttpBehaviours();
+}
+
+UserProfile profile = client.getUserProfile(credentials, context);
+saveUserProfile(context, profile);
+redirectToOriginallyRequestedUrl(context, response);
+```
+
+See the final implementations in [j2e-pac4j](https://github.com/pac4j/j2e-pac4j/blob/master/src/main/java/org/pac4j/j2e/filter/CallbackFilter.java#L65) and [play-pac4j](https://github.com/pac4j/play-pac4j/blob/master/play-pac4j-java/src/main/java/org/pac4j/play/CallbackController.java#L63).
+
+Read the [Javadoc](http://www.pac4j.org/apidocs/pac4j/index.html) and the [technical components](https://github.com/pac4j/pac4j/wiki/Technical-components) for more information.
+
+
+## Need help?
 
 If you have any question, please use the following mailing lists:
 - [pac4j users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)

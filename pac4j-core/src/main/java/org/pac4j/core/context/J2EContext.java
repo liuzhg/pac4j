@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,13 +15,14 @@
  */
 package org.pac4j.core.context;
 
-import java.io.IOException;
-import java.util.Map;
+import org.pac4j.core.exception.TechnicalException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.pac4j.core.exception.TechnicalException;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Map;
 
 /**
  * This implementation uses the J2E request and session.
@@ -38,7 +39,8 @@ public class J2EContext implements WebContext {
     /**
      * Build a J2E context from the current HTTP request.
      *
-     * @param request
+     * @param request the current request
+     * @param response the current response
      */
     public J2EContext(final HttpServletRequest request, final HttpServletResponse response) {
         this.request = request;
@@ -46,62 +48,66 @@ public class J2EContext implements WebContext {
     }
 
     /**
-     * Return a request parameter.
-     *
-     * @param name
-     * @return the request parameter
+     * {@inheritDoc}
      */
     public String getRequestParameter(final String name) {
         return this.request.getParameter(name);
     }
 
     /**
-     * Return all request parameters.
-     *
-     * @return all request parameters
+     * {@inheritDoc}
+     */
+    public Object getRequestAttribute(final String name) { return this.request.getAttribute(name); }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setRequestAttribute(final String name, final Object value) { this.request.setAttribute(name, value); }
+
+    /**
+     * {@inheritDoc}
      */
     public Map<String, String[]> getRequestParameters() {
         return this.request.getParameterMap();
     }
 
     /**
-     * Return a request header.
-     *
-     * @param name
-     * @return the request header
+     * {@inheritDoc}
      */
     public String getRequestHeader(final String name) {
         return this.request.getHeader(name);
     }
 
     /**
-     * Save an attribute in session.
-     *
-     * @param name
-     * @param value
+     * {@inheritDoc}
      */
     public void setSessionAttribute(final String name, final Object value) {
         this.request.getSession().setAttribute(name, value);
     }
 
     /**
-     * Get an attribute from session.
-     *
-     * @param name
-     * @return the session attribute
+     * {@inheritDoc}
      */
     public Object getSessionAttribute(final String name) {
         return this.request.getSession().getAttribute(name);
     }
 
+    @Override
+    public Object getSessionIdentifier() {
+        return this.request.getSession().getId();
+    }
+
     /**
-     * Return the request method : GET, POST...
-     *
-     * @return the request method
+     * {@inheritDoc}
      */
     public String getRequestMethod() {
         return this.request.getMethod();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getRemoteAddr() { return this.request.getRemoteAddr(); }
 
     /**
      * Return the HTTP request.
@@ -122,9 +128,7 @@ public class J2EContext implements WebContext {
     }
 
     /**
-     * Write some content in the response.
-     *
-     * @param content
+     * {@inheritDoc}
      */
     public void writeResponseContent(final String content) {
         if (content != null) {
@@ -137,9 +141,7 @@ public class J2EContext implements WebContext {
     }
 
     /**
-     * Set the response status.
-     *
-     * @param code
+     * {@inheritDoc}
      */
     public void setResponseStatus(final int code) {
         if (code == HttpConstants.OK || code == HttpConstants.TEMP_REDIRECT) {
@@ -154,42 +156,46 @@ public class J2EContext implements WebContext {
     }
 
     /**
-     * Add a header to the response.
-     *
-     * @param name
-     * @param value
+     * {@inheritDoc}
      */
     public void setResponseHeader(final String name, final String value) {
         this.response.setHeader(name, value);
     }
 
+    @Override
+    public void setResponseCharacterEncoding(final String encoding) {
+        this.response.setCharacterEncoding(encoding);
+    }
+
+    @Override
+    public void setResponseContentType(final String content) {
+        this.response.setContentType(content);
+    }
+
     /**
-     * Return the server name.
-     *
-     * @return the server name
+     * {@inheritDoc}
      */
     public String getServerName() {
         return this.request.getServerName();
     }
 
     /**
-     * Return the server port.
-     *
-     * @return the server port
+     * {@inheritDoc}
      */
     public int getServerPort() {
         return this.request.getServerPort();
     }
 
     /**
-     * Return the scheme.
-     *
-     * @return the scheme
+     * {@inheritDoc}
      */
     public String getScheme() {
         return this.request.getScheme();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String getFullRequestURL() {
         StringBuffer requestURL = request.getRequestURL();
         String queryString = request.getQueryString();
@@ -198,5 +204,34 @@ public class J2EContext implements WebContext {
         } else {
             return requestURL.append('?').append(queryString).toString();
         }
+    }
+
+    @Override
+    public Collection<Cookie> getRequestCookies() {
+        final javax.servlet.http.Cookie[] cookies = this.request.getCookies();
+        final Collection<Cookie> pac4jCookies = new LinkedHashSet<>(cookies.length);
+        for (javax.servlet.http.Cookie c : this.request.getCookies()) {
+            final Cookie cookie = new Cookie(c.getName(), c.getValue());
+            cookie.setComment(c.getComment());
+            cookie.setDomain(c.getDomain());
+            cookie.setHttpOnly(c.isHttpOnly());
+            cookie.setMaxAge(c.getMaxAge());
+            cookie.setPath(c.getPath());
+            cookie.setSecure(c.getSecure());
+            pac4jCookies.add(cookie);
+        }
+        return pac4jCookies;
+    }
+
+    @Override
+    public void addResponseCookie(final Cookie cookie) {
+        javax.servlet.http.Cookie c = new javax.servlet.http.Cookie(cookie.getName(), cookie.getValue());
+        c.setSecure(cookie.isSecure());
+        c.setPath(cookie.getPath());
+        c.setMaxAge(cookie.getMaxAge());
+        c.setHttpOnly(cookie.isHttpOnly());
+        c.setComment(cookie.getComment());
+        c.setDomain(cookie.getDomain());
+        this.response.addCookie(c);
     }
 }

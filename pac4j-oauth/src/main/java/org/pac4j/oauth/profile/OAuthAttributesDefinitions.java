@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ import org.pac4j.oauth.profile.facebook.FacebookAttributesDefinition;
 import org.pac4j.oauth.profile.foursquare.FoursquareAttributesDefinition;
 import org.pac4j.oauth.profile.github.GitHubAttributesDefinition;
 import org.pac4j.oauth.profile.google2.Google2AttributesDefinition;
-import org.pac4j.oauth.profile.linkedin.LinkedInAttributesDefinition;
 import org.pac4j.oauth.profile.linkedin2.LinkedIn2AttributesDefinition;
+import org.pac4j.oauth.profile.ok.OkAttributesDefinition;
 import org.pac4j.oauth.profile.orcid.OrcidAttributesDefinition;
 import org.pac4j.oauth.profile.paypal.PayPalAttributesDefinition;
+import org.pac4j.oauth.profile.strava.StravaAttributesDefinition;
 import org.pac4j.oauth.profile.twitter.TwitterAttributesDefinition;
 import org.pac4j.oauth.profile.vk.VkAttributesDefinition;
 import org.pac4j.oauth.profile.windowslive.WindowsLiveAttributesDefinition;
@@ -46,8 +47,6 @@ public final class OAuthAttributesDefinitions {
 
     public final static AttributesDefinition google2Definition = new Google2AttributesDefinition();
 
-    public final static AttributesDefinition linkedinDefinition = new LinkedInAttributesDefinition();
-
     public final static AttributesDefinition twitterDefinition = new TwitterAttributesDefinition();
 
     public final static AttributesDefinition yahooDefinition = new YahooAttributesDefinition();
@@ -64,10 +63,14 @@ public final class OAuthAttributesDefinitions {
 
     public final static AttributesDefinition vkDefinition = new VkAttributesDefinition();
 
+    public final static AttributesDefinition okDefinition = new OkAttributesDefinition();
+
     public final static AttributesDefinition foursquareDefinition = new FoursquareAttributesDefinition();
 
     public final static AttributesDefinition bitbucketDefinition = new BitbucketAttributesDefinition();
 
     public final static AttributesDefinition orcidDefinition = new OrcidAttributesDefinition();
+
+    public final static AttributesDefinition stravaDefinition = new StravaAttributesDefinition();
 
 }

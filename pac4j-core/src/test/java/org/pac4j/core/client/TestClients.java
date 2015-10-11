@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.pac4j.core.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import junit.framework.TestCase;
-
+import org.junit.Test;
 import org.pac4j.core.context.MockWebContext;
+import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.util.TestsConstants;
 import org.pac4j.core.util.TestsHelper;
+
+import static org.junit.Assert.*;
 
 /**
  * This class tests the {@link Clients} class.
@@ -31,7 +33,7 @@ import org.pac4j.core.util.TestsHelper;
  * @since 1.3.0
  */
 @SuppressWarnings("rawtypes")
-public final class TestClients extends TestCase implements TestsConstants {
+public final class TestClients implements TestsConstants {
 
     private MockBaseClient newFacebookClient() {
         return new MockBaseClient("FacebookClient");
@@ -41,19 +43,22 @@ public final class TestClients extends TestCase implements TestsConstants {
         return new MockBaseClient("YahooClient");
     }
 
+    @Test
     public void testMissingClient() {
         final Clients clientsGroup = new Clients();
         clientsGroup.setCallbackUrl(CALLBACK_URL);
         TestsHelper.initShouldFail(clientsGroup, "clients cannot be null");
     }
 
-    public void testMissingCallbackUrl() {
-        final Clients clientsGroup = new Clients();
-        final List<Client> clients = new ArrayList<Client>();
-        clients.add(newFacebookClient());
-        TestsHelper.initShouldFail(clientsGroup, "callbackUrl cannot be blank");
+    @Test
+    public void testNoCallbackUrl() {
+        MockBaseClient facebookClient = newFacebookClient();
+        final Clients clientsGroup = new Clients(facebookClient);
+        clientsGroup.init();
+        assertNull(facebookClient.getCallbackUrl());
     }
 
+    @Test
     public void testTwoClients() {
         final MockBaseClient facebookClient = newFacebookClient();
         final MockBaseClient yahooClient = newYahooClient();
@@ -74,6 +79,7 @@ public final class TestClients extends TestCase implements TestsConstants {
         assertEquals(yahooClient, clientsGroup.findClient(yahooClient.getName()));
     }
 
+    @Test
     public void testDoubleInit() {
         final MockBaseClient facebookClient = newFacebookClient();
         final Clients clientsGroup = new Clients();
@@ -88,6 +94,7 @@ public final class TestClients extends TestCase implements TestsConstants {
                 facebookClient.getCallbackUrl());
     }
 
+    @Test
     public void testAllClients() {
         final MockBaseClient facebookClient = newFacebookClient();
         final MockBaseClient yahooClient = newYahooClient();
@@ -102,6 +109,7 @@ public final class TestClients extends TestCase implements TestsConstants {
         assertTrue(clients2.containsAll(clients));
     }
 
+    @Test
     public void testClientWithCallbackUrl() {
         final MockBaseClient facebookClient = newFacebookClient();
         facebookClient.setCallbackUrl(LOGIN_URL);
@@ -115,6 +123,21 @@ public final class TestClients extends TestCase implements TestsConstants {
                 yahooClient.getCallbackUrl());
     }
 
+    @Test
+    public void testClientWithCallbackUrlWithoutIncludingClientName() {
+        final MockBaseClient facebookClient = newFacebookClient();
+        facebookClient.setCallbackUrl(LOGIN_URL);
+        facebookClient.setIncludeClientNameInCallbackUrl(false);
+        final MockBaseClient yahooClient = newYahooClient();
+        yahooClient.setIncludeClientNameInCallbackUrl(false);
+        final Clients group = new Clients(CALLBACK_URL, facebookClient, yahooClient);
+        group.setClientNameParameter(KEY);
+        group.init();
+        assertEquals(LOGIN_URL, facebookClient.getCallbackUrl());
+        assertEquals(CALLBACK_URL, yahooClient.getCallbackUrl());
+    }
+
+    @Test
     public void testByClass1() {
         final MockBaseClient facebookClient = newFacebookClient();
         final FakeClient fakeClient = new FakeClient();
@@ -123,11 +146,20 @@ public final class TestClients extends TestCase implements TestsConstants {
         assertEquals(fakeClient, clients.findClient(FakeClient.class));
     }
 
+    @Test
     public void testByClass2() {
         final MockBaseClient facebookClient = newFacebookClient();
         final FakeClient fakeClient = new FakeClient();
         final Clients clients = new Clients(CALLBACK_URL, fakeClient, facebookClient);
         assertEquals(facebookClient, clients.findClient(MockBaseClient.class));
         assertEquals(fakeClient, clients.findClient(FakeClient.class));
+    }
+
+    @Test(expected = TechnicalException.class)
+    public void rejectSameName() {
+        final MockBaseClient client1 = new MockBaseClient(NAME);
+        final MockBaseClient client2 = new MockBaseClient(NAME);
+        final Clients clients = new Clients(CALLBACK_URL, client1, client2);
+        clients.init();
     }
 }

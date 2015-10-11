@@ -23,3 +23,5 @@ cas.log
 perfStats.log
 *.iml
 .idea
+overlays
+pac4j-test-cas/overlays/

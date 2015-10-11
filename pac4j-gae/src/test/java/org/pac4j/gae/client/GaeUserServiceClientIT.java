@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Patrice de Saint Steban
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package org.pac4j.gae.client;
 
 import org.pac4j.core.client.Client;
-import org.pac4j.core.client.Mechanism;
+import org.pac4j.core.client.ClientType;
 import org.pac4j.core.client.RedirectAction;
 import org.pac4j.core.client.ClientIT;
 import org.pac4j.core.context.WebContext;
@@ -109,7 +109,7 @@ public class GaeUserServiceClientIT extends ClientIT implements TestsConstants {
     }
 
     @Override
-    protected Mechanism getMechanism() {
-        return Mechanism.GAE_MECHANISM;
+    protected ClientType getClientType() {
+        return ClientType.GAE_PROVIDER;
     }
 }

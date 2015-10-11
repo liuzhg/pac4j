@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
  */
 package org.pac4j.core.context;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 /**
@@ -32,7 +34,14 @@ public abstract class BaseResponseContext implements WebContext {
 
     protected String responseLocation;
 
-    protected final Map<String, String> responseHeaders = new HashMap<String, String>();
+    protected String responseContentType;
+
+    protected String responseEncoding;
+
+    protected final Map<String, String> responseHeaders = new HashMap<>();
+
+    protected final Collection<Cookie> responseCookies = new LinkedHashSet<>();
+
 
     public void writeResponseContent(final String content) {
         if (content != null) {
@@ -64,4 +73,26 @@ public abstract class BaseResponseContext implements WebContext {
         return this.responseHeaders;
     }
 
+    @Override
+    public void setResponseCharacterEncoding(final String encoding) {
+        this.responseEncoding = encoding;
+    }
+
+    @Override
+    public void setResponseContentType(final String content) {
+        this.responseContentType = content;
+    }
+
+    public String getResponseContentType() {
+        return responseContentType;
+    }
+
+    public String getResponseEncoding() {
+        return responseEncoding;
+    }
+
+    @Override
+    public void addResponseCookie(Cookie cookie) {
+        this.responseCookies.add(cookie);
+    }
 }

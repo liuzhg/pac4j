@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
  */
 package org.pac4j.core.context;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 /**
@@ -32,6 +34,8 @@ public class MockWebContext extends BaseResponseContext {
 
     protected final Map<String, Object> session = new HashMap<String, Object>();
 
+    protected final Map<String, Object> attributes = new HashMap<String, Object>();
+
     protected String method = "GET";
 
     protected String serverName = "localhost";
@@ -41,6 +45,10 @@ public class MockWebContext extends BaseResponseContext {
     protected int serverPort = 80;
 
     protected String fullRequestURL = null;
+
+    protected String ip = null;
+
+    protected final Collection<Cookie> requestCookies = new LinkedHashSet<>();
 
     protected MockWebContext() {
     }
@@ -57,7 +65,7 @@ public class MockWebContext extends BaseResponseContext {
     /**
      * Add request parameters for mock purpose.
      *
-     * @param parameters
+     * @param parameters parameters
      * @return this mock web context
      */
     public MockWebContext addRequestParameters(final Map<String, String> parameters) {
@@ -68,8 +76,8 @@ public class MockWebContext extends BaseResponseContext {
     /**
      * Add a request parameter for mock purpose.
      *
-     * @param key
-     * @param value
+     * @param key parameter name
+     * @param value parameter value
      * @return this mock web context
      */
     public MockWebContext addRequestParameter(final String key, final String value) {
@@ -80,8 +88,8 @@ public class MockWebContext extends BaseResponseContext {
     /**
      * Add a request header for mock purpose.
      *
-     * @param key
-     * @param value
+     * @param key request name
+     * @param value request value
      * @return this mock web context
      */
     public MockWebContext addRequestHeader(final String key, final String value) {
@@ -92,8 +100,8 @@ public class MockWebContext extends BaseResponseContext {
     /**
      * Add a session attribute for mock purpose.
      *
-     * @param name
-     * @param value
+     * @param name session attribute name
+     * @param value session attribute value
      * @return this mock web context
      */
     public MockWebContext addSessionAttribute(final String name, final Object value) {
@@ -104,7 +112,7 @@ public class MockWebContext extends BaseResponseContext {
     /**
      * Set the request method for mock purpose.
      *
-     * @param method
+     * @param method request method
      * @return this mock web context
      */
     public MockWebContext setRequestMethod(final String method) {
@@ -112,8 +120,23 @@ public class MockWebContext extends BaseResponseContext {
         return this;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public Object getRequestAttribute(final String name) { return this.attributes.get(name); }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setRequestAttribute(final String name, final Object value) { this.attributes.put(name, value); }
+
     public String getRequestParameter(final String name) {
         return this.parameters.get(name);
+    }
+
+    public MockWebContext setRemoteAddress(final String ip) {
+        this.ip = ip;
+        return this;
     }
 
     public String getRequestHeader(final String name) {
@@ -128,9 +151,18 @@ public class MockWebContext extends BaseResponseContext {
         return this.session.get(name);
     }
 
+    public void invalidateSession() { this.session.clear(); }
+
+    @Override
+    public Object getSessionIdentifier() {
+        return hashCode();
+    }
+
     public String getRequestMethod() {
         return this.method;
     }
+
+    public String getRemoteAddr() { return this.ip; }
 
     public Map<String, String[]> getRequestParameters() {
         final Map<String, String[]> map = new HashMap<String, String[]>();
@@ -141,6 +173,7 @@ public class MockWebContext extends BaseResponseContext {
         }
         return map;
     }
+
 
     public String getServerName() {
         return serverName;
@@ -176,5 +209,10 @@ public class MockWebContext extends BaseResponseContext {
 
     public void setFullRequestURL(String fullRequestURL) {
         this.fullRequestURL = fullRequestURL;
+    }
+
+    @Override
+    public Collection<Cookie> getRequestCookies() {
+        return this.requestCookies;
     }
 }

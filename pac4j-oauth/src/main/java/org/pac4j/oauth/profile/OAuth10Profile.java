@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ public abstract class OAuth10Profile extends OAuth20Profile {
     /**
      * Set the access token secret
      * 
-     * @param accessSecret
+     * @param accessSecret the access token secret
      */
     public void setAccessSecret(final String accessSecret) {
         addAttribute(OAuthAttributesDefinition.ACCESS_SECRET, accessSecret);

@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -28,6 +28,6 @@ public class CasClientCasProtocol20IT extends CasClientIT {
     
     @Override
     protected CasProtocol getCasProtocol() {
-        return CasProtocol.CAS20_PROXY;
+        return CasProtocol.CAS20;
     }
 }

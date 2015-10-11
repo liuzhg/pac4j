@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.pac4j.core.context;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -28,98 +29,154 @@ public interface WebContext {
     /**
      * Return a request parameter.
      *
-     * @param name
+     * @param name name of the parameter
      * @return the request parameter
      */
-    public String getRequestParameter(String name);
+    String getRequestParameter(String name);
 
     /**
      * Return all request parameters.
      *
      * @return all request parameters
      */
-    public Map<String, String[]> getRequestParameters();
+    Map<String, String[]> getRequestParameters();
+
+    /**
+     * Return a request attribute.
+     *
+     * @param name the name of the attribute
+     * @return the attribute
+     */
+    Object getRequestAttribute(String name);
+
+    /**
+     * Save a request attribute.
+     *
+     * @param name the name of the attribute
+     * @param value the attribute
+     */
+    void setRequestAttribute(String name, Object value);
 
     /**
      * Return a request header.
      *
-     * @param name
+     * @param name name of the header
      * @return the request header
      */
-    public String getRequestHeader(String name);
+    String getRequestHeader(String name);
 
     /**
      * Save an attribute in session.
      *
-     * @param name
-     * @param value
+     * @param name name of the session attribute
+     * @param value value of the session attribute
      */
-    public void setSessionAttribute(String name, Object value);
+    void setSessionAttribute(String name, Object value);
 
     /**
      * Get an attribute from session.
      *
-     * @param name
+     * @param name name of the session attribute
      * @return the session attribute
      */
-    public Object getSessionAttribute(String name);
+    Object getSessionAttribute(String name);
+
+    /**
+     * Gets the session id for this context.
+     * @return the session identifier
+     */
+    Object getSessionIdentifier();
 
     /**
      * Return the request method.
      *
      * @return the request method
      */
-    public String getRequestMethod();
+    String getRequestMethod();
+
+    /**
+     * Return the remote address.
+     *
+     * @return the remote address.
+     */
+    String getRemoteAddr();
 
     /**
      * Write some content in the response.
      *
-     * @param content
+     * @param content content to write in response
      */
-    public void writeResponseContent(String content);
+    void writeResponseContent(String content);
 
     /**
      * Set the response status.
      *
-     * @param code
+     * @param code status code to set for the response 
      */
-    public void setResponseStatus(int code);
+    void setResponseStatus(int code);
 
     /**
      * Add a header to the response.
      *
-     * @param name
-     * @param value
+     * @param name name of the header
+     * @param value value of the header
      */
-    public void setResponseHeader(String name, String value);
+    void setResponseHeader(String name, String value);
+
+    /**
+     * Sets the response encoding type.
+     * @param encoding the character encoding
+     */
+    void setResponseCharacterEncoding(String encoding);
+
+    /**
+     * Sets the response content type.
+     * @param content the content type
+     */
+    void setResponseContentType(String content);
 
     /**
      * Return the server name.
      *
      * @return the server name
      */
-    public String getServerName();
+    String getServerName();
 
     /**
      * Return the server port.
      *
      * @return the server port
      */
-    public int getServerPort();
+    int getServerPort();
 
     /**
      * Return the scheme.
      *
      * @return the scheme
      */
-    public String getScheme();
+    String getScheme();
 
     /**
      * Return the full URL (with query string) the client used to request the server.
-     * 
+     *
      * @return the URL
      * @since 1.5.0
      */
-    public String getFullRequestURL();
+    String getFullRequestURL();
 
+    /**
+     * Retrieves request cookies.
+     *
+     * @return the request cookies
+     * @since 1.8.1
+     */
+    Collection<Cookie> getRequestCookies();
+
+    /**
+     * Adds cookies to the response
+     *
+     * @param cookie a cookie to add to the response
+     * @since 1.8.1
+     */
+    void addResponseCookie(Cookie cookie);
 }

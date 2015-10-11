@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package org.scribe.builder.api;
 
-import org.scribe.builder.api.DefaultApi20;
 import org.scribe.extractors.AccessTokenExtractor;
 import org.scribe.extractors.Google2JsonExtractor;
 import org.scribe.model.OAuthConfig;
@@ -28,13 +27,13 @@ import org.scribe.utils.OAuthEncoder;
  * @author Jerome Leleu
  * @since 1.2.0
  */
-public class GoogleApi20 extends DefaultApi20 {
-    private static final String AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/auth?client_id=%s&redirect_uri=%s&scope=%s&response_type=code";
+public class GoogleApi20 extends StateApi20 {
+    private static final String AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/auth?client_id=%s&redirect_uri=%s&scope=%s&response_type=code&state=%s";
     
     @Override
-    public String getAuthorizationUrl(final OAuthConfig config) {
+    public String getAuthorizationUrl(final OAuthConfig config, String state) {
         return String.format(AUTHORIZATION_URL, config.getApiKey(), OAuthEncoder.encode(config.getCallback()),
-                             OAuthEncoder.encode(config.getScope()));
+                             OAuthEncoder.encode(config.getScope()), state);
     }
     
     @Override

@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -30,11 +30,10 @@ import org.pac4j.openid.profile.yahoo.YahooOpenIdAttributesDefinition;
 import org.pac4j.openid.profile.yahoo.YahooOpenIdProfile;
 
 /**
- * This class is the OpenID client to authenticate users with their yahoo account.
- * <p />
- * It returns a {@link org.pac4j.openid.profile.yahoo.YahooOpenIdProfile}.
+ * <p>This class is the OpenID client to authenticate users with their yahoo account.</p>
+ * <p>It returns a {@link org.pac4j.openid.profile.yahoo.YahooOpenIdProfile}.</p>
  * 
- * @see org.pac4j.openid.profile.google.GoogleOpenIdProfile
+ * @see org.pac4j.openid.profile.yahoo.YahooOpenIdProfile
  * @author Patrice de Saint Steban
  * @since 1.6.0
  */
@@ -83,7 +82,7 @@ public class YahooOpenIdClient extends BaseOpenIdClient<YahooOpenIdProfile> {
 
         if (authSuccess.hasExtension(AxMessage.OPENID_NS_AX)) {
             final FetchResponse fetchResp = (FetchResponse) authSuccess.getExtension(AxMessage.OPENID_NS_AX);
-            for (final String name : OpenIdAttributesDefinitions.googleOpenIdDefinition.getAllAttributes()) {
+            for (final String name : OpenIdAttributesDefinitions.yahooOpenIdDefinition.getAllAttributes()) {
                 profile.addAttribute(name, fetchResp.getAttributeValue(name));
             }
         }

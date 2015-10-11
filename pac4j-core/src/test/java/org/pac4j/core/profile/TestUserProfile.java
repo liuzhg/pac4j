@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -33,8 +33,6 @@ public final class TestUserProfile extends TestCase implements TestsConstants {
     private static final String ID = "id";
 
     private static final String ROLE1 = "role1";
-    private static final String ROLE2 = "role2";
-    private static final String ROLE3 = "role3";
     private static final String PERMISSION = "onePermission";
 
     public void testSetId() {
@@ -92,64 +90,5 @@ public final class TestUserProfile extends TestCase implements TestsConstants {
         assertFalse(profile.isRemembered());
         profile.setRemembered(true);
         assertTrue(profile.isRemembered());
-    }
-
-    public void testHasAnyRoleOk() {
-        final UserProfile profile = new UserProfile();
-        profile.addRole(ROLE1);
-        assertTrue(profile.hasAnyRole(new String[] { ROLE1 }));
-    }
-
-    public void testHasAnyRoleNull() {
-        final UserProfile profile = new UserProfile();
-        profile.addRole(ROLE1);
-        assertTrue(profile.hasAnyRole(null));
-    }
-
-    public void testHasAnyRoleEmpty() {
-        final UserProfile profile = new UserProfile();
-        profile.addRole(ROLE1);
-        assertTrue(profile.hasAnyRole(new String[] { }));
-    }
-
-    public void testHasAnyRoleOkTwoRoles() {
-        final UserProfile profile = new UserProfile();
-        profile.addRole(ROLE1);
-        assertTrue(profile.hasAnyRole(new String[] { ROLE2, ROLE1 }));
-    }
-
-    public void testHasAnyRoleFail() {
-        final UserProfile profile = new UserProfile();
-        profile.addRole(ROLE1);
-        profile.addRole(ROLE3);
-        assertFalse(profile.hasAnyRole(new String[] { ROLE2 }));
-    }
-
-    public void testHasAllRolesOkDifferentOrder() {
-        final UserProfile profile = new UserProfile();
-        profile.addRole(ROLE1);
-        profile.addRole(ROLE3);
-        assertTrue(profile.hasAllRoles(new String[] { ROLE3, ROLE1 }));
-    }
-
-    public void testHasAllRolesNull() {
-        final UserProfile profile = new UserProfile();
-        profile.addRole(ROLE1);
-        profile.addRole(ROLE3);
-        assertTrue(profile.hasAllRoles(null));
-    }
-
-    public void testHasAllRolesEmpty() {
-        final UserProfile profile = new UserProfile();
-        profile.addRole(ROLE1);
-        profile.addRole(ROLE3);
-        assertTrue(profile.hasAllRoles(new String[] {}));
-    }
-
-    public void testHasAllRolesFail() {
-        final UserProfile profile = new UserProfile();
-        profile.addRole(ROLE1);
-        profile.addRole(ROLE2);
-        assertFalse(profile.hasAllRoles(new String[] { ROLE3, ROLE1 }));
     }
 }

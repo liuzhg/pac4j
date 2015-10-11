@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -31,11 +31,13 @@ public final class ProfileHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(ProfileHelper.class);
 
+    private static boolean enforceProfileDefinition = false;
+
     /**
      * Indicate if the user identifier matches this kind of profile.
      * 
-     * @param id
-     * @param clazz
+     * @param id user identifier
+     * @param clazz profile class
      * @return if the user identifier matches this kind of profile
      */
     public static boolean isTypedIdOf(final String id, final Class<? extends UserProfile> clazz) {
@@ -49,8 +51,8 @@ public final class ProfileHelper {
     /**
      * Build a profile from a typed id and a map of attributes.
      * 
-     * @param typedId
-     * @param attributes
+     * @param typedId typed identifier
+     * @param attributes user attributes
      * @return the user profile built
      */
     public static UserProfile buildProfile(final String typedId, final Map<String, Object> attributes) {
@@ -63,18 +65,26 @@ public final class ProfileHelper {
                         String completeName;
                         if ("CasProfile".equals(className) || "CasProxyProfile".equals(className)) {
                             completeName = "org.pac4j.cas.profile." + className;
-                        } else if ("Saml2Profile".equals(className)) {
-                            completeName = "org.pac4j.saml.profile.Saml2Profile";
+                        } else if ("HttpTGTProfile".equals(className)) {
+                            completeName = "org.pac4j.cas.profile.HttpTGTProfile";
+                        } else if ("SAML2Profile".equals(className)) {
+                            completeName = "org.pac4j.saml.profile.SAML2Profile";
                         } else if ("HttpProfile".equals(className)) {
                             completeName = "org.pac4j.http.profile.HttpProfile";
-                        } else if ("MyOpenIdProfile".equals(className)) {
-                            completeName = "org.pac4j.openid.profile.myopenid.MyOpenIdProfile";
-                        } else if ("GoogleOpenIdProfile".equals(className)) {
-                            completeName = "org.pac4j.openid.profile.google.GoogleOpenIdProfile";
+                        } else if ("OidcProfile".equals(className)) {
+                            completeName = "org.pac4j.oidc.profile.OidcProfile";
+                        } else if ("LdapProfile".equals(className)) {
+                            completeName = "org.pac4j.ldap.profile.LdapProfile";
+                        } else if ("DbProfile".equals(className)) {
+                            completeName = "org.pac4j.sql.profile.DbProfile";
+                        } else if ("MongoProfile".equals(className)) {
+                            completeName = "org.pac4j.mongo.profile.MongoProfile";
                         } else if ("YahooOpenIdProfile".equals(className)) {
                         	completeName = "org.pac4j.openid.profile.yahoo.YahooOpenIdProfile";
                         } else if ("GaeUserServiceProfile".equals(className)) {
-                        	completeName = "org.pac4j.gae.profile.GaeUserServiceProfile";
+                            completeName = "org.pac4j.gae.profile.GaeUserServiceProfile";
+                        } else if ("StormpathProfile".equals(className)) {
+                            completeName = "org.pac4j.stormpath.profile.StormpathProfile";
                         } else {
                             final String packageName = className.substring(0, className.length() - 7).toLowerCase();
                             completeName = "org.pac4j.oauth.profile." + packageName + "." + className;
@@ -96,12 +106,27 @@ public final class ProfileHelper {
     }
 
     /**
-     * Set whether the input data should be stored in object to be restored for CAS serialization when toString() is called. Save memory
-     * also.
+     * Set whether the input data should be stored in object to be restored for CAS serialization when toString() is called.
+     * Save memory if <code>false</code>.
      * 
-     * @param keepRawData
+     * @param keepRawData should we keep the raw data (for CAS)
      */
     public static void setKeepRawData(final boolean keepRawData) {
         RawDataObject.setKeepRawData(keepRawData);
+    }
+
+    public static boolean isEnforceProfileDefinition() {
+        return enforceProfileDefinition;
+    }
+
+    /**
+     * Set whether the profile definition (= attributes definition) should be enforced (= undefined attributes are ignored).
+     * <code>false</code> since version 1.8. It was <code>true</code> before.
+     *
+     * @param enforceProfileDefinition whether the profile definition should be enforced
+     * @since 1.8.0
+     */
+    public static void setEnforceProfileDefinition(boolean enforceProfileDefinition) {
+        ProfileHelper.enforceProfileDefinition = enforceProfileDefinition;
     }
 }

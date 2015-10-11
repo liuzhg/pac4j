@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    import org.pac4j.openid.profile.OpenIdProfile;
 (the "License");
@@ -21,7 +21,7 @@ import static org.junit.Assert.assertNotNull;
 import java.util.Locale;
 
 import org.pac4j.core.client.Client;
-import org.pac4j.core.client.Mechanism;
+import org.pac4j.core.client.ClientType;
 import org.pac4j.core.client.ClientIT;
 import org.pac4j.core.profile.Gender;
 import org.pac4j.core.profile.ProfileHelper;
@@ -100,7 +100,7 @@ public class YahooOpenIdClientIT extends ClientIT implements TestsConstants {
     }
 
     @Override
-    protected Mechanism getMechanism() {
-        return Mechanism.OPENID_PROTOCOL;
+    protected ClientType getClientType() {
+        return ClientType.OPENID_PROTOCOL;
     }
 }

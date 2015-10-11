@@ -11,7 +11,7 @@ import org.pac4j.core.profile.CommonProfile;
  * @author Jerome Leleu
  * @since 1.5.1
  */
-public class FakeClient extends BaseClient<Credentials, CommonProfile> {
+public class FakeClient extends IndirectClient<Credentials, CommonProfile> {
 
     @Override
     protected BaseClient<Credentials, CommonProfile> newClient() {
@@ -39,7 +39,7 @@ public class FakeClient extends BaseClient<Credentials, CommonProfile> {
     }
 
     @Override
-    public Mechanism getMechanism() {
+    public ClientType getClientType() {
         throw new UnsupportedOperationException("Not implemneted yet");
     }
 

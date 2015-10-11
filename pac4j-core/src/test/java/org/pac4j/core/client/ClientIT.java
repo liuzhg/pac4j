@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.pac4j.core.context.MockWebContext;
+import org.pac4j.core.context.HttpConstants;
+import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.kryo.ColorSerializer;
@@ -43,6 +44,11 @@ import org.slf4j.LoggerFactory;
 import com.esotericsoftware.kryo.Kryo;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * This class is the generic test case for client.
@@ -55,22 +61,22 @@ public abstract class ClientIT extends TestCase implements TestsConstants {
 
     protected static final Logger logger = LoggerFactory.getLogger(ClientIT.class);
 
-    protected abstract Mechanism getMechanism();
+    protected abstract ClientType getClientType();
 
-    public void testMechanism() {
+    public void testClientType() {
         final BaseClient client = (BaseClient) getClient();
-        assertEquals(getMechanism(), client.getMechanism());
+        assertEquals(getClientType(), client.getClientType());
     }
 
     public void testMissingCallbackUrl() {
-        final BaseClient client = (BaseClient) getClient();
+        final IndirectClient client = (IndirectClient) getClient();
         client.setCallbackUrl(null);
         TestsHelper.initShouldFail(client, "callbackUrl cannot be blank");
     }
 
-    protected BaseClient internalTestClone(final BaseClient oldClient) {
+    protected IndirectClient internalTestClone(final IndirectClient oldClient) {
         oldClient.setCallbackUrl(CALLBACK_URL);
-        final BaseClient client = oldClient.clone();
+        final IndirectClient client = (IndirectClient) oldClient.clone();
         assertEquals(oldClient.getCallbackUrl(), client.getCallbackUrl());
         assertEquals(oldClient.getName(), client.getName());
         return client;
@@ -81,7 +87,7 @@ public abstract class ClientIT extends TestCase implements TestsConstants {
         try {
             final Client client = getClient();
 
-            final MockWebContext context = MockWebContext.create();
+            final J2EContext context = getJ2EContext();
             final WebClient webClient = TestsHelper.newWebClient(isJavascriptEnabled());
 
             final HtmlPage redirectionPage = getRedirectionPage(webClient, client, context);
@@ -124,12 +130,24 @@ public abstract class ClientIT extends TestCase implements TestsConstants {
         }
     }
 
+    protected J2EContext getJ2EContext() {
+        return new J2EContext(getHttpServletRequest(), getHttpServletResponse());
+    }
+
+    protected HttpServletRequest getHttpServletRequest() {
+        return new MockHttpServletRequest();
+    }
+
+    protected HttpServletResponse getHttpServletResponse() {
+        return new MockHttpServletResponse();
+    }
+
     // Default implementation use getCallbackUrl method
-    protected void updateContextForAuthn(WebClient webClient, HtmlPage redirectionPage, MockWebContext context)
+    protected void updateContextForAuthn(WebClient webClient, HtmlPage redirectionPage, J2EContext context)
             throws Exception {
         final String callbackUrl = getCallbackUrl(webClient, redirectionPage);
-        final MockWebContext mockWebContext = context;
-        mockWebContext.addRequestParameters(TestsHelper.getParametersFromUrl(callbackUrl));
+        final MockHttpServletRequest request = (MockHttpServletRequest) context.getRequest();
+        request.addParameters(TestsHelper.getParametersFromUrl(callbackUrl));
     }
 
     protected void registerForKryo(final Kryo kryo) {
@@ -141,12 +159,12 @@ public abstract class ClientIT extends TestCase implements TestsConstants {
 
     protected abstract Client getClient();
 
-    protected HtmlPage getRedirectionPage(final WebClient webClient, final Client<?, ?> client, final MockWebContext context)
+    protected HtmlPage getRedirectionPage(final WebClient webClient, final Client<?, ?> client, final J2EContext context)
             throws Exception {
         final BaseClient baseClient = (BaseClient) client;
         // force immediate redirection for tests
-        baseClient.redirect(context, true, false);
-        final String redirectionUrl = context.getResponseLocation();
+        baseClient.redirect(context, true);
+        final String redirectionUrl = context.getResponse().getHeader(HttpConstants.LOCATION_HEADER);
         logger.debug("redirectionUrl : {}", redirectionUrl);
         final HtmlPage loginPage = webClient.getPage(redirectionUrl);
         return loginPage;
@@ -198,7 +216,7 @@ public abstract class ClientIT extends TestCase implements TestsConstants {
         if (isCancellable()) {
             final Client client = getClient();
 
-            final MockWebContext context = MockWebContext.create();
+            final J2EContext context = getJ2EContext();
             final WebClient webClient = TestsHelper.newWebClient(isJavascriptEnabled());
 
             final HtmlPage redirectionPage = getRedirectionPage(webClient, client, context);
@@ -213,8 +231,12 @@ public abstract class ClientIT extends TestCase implements TestsConstants {
 
     protected void updateContextForCancel(HtmlPage redirectionPage, WebContext context) throws Exception {
         final String callbackUrl = getCallbackUrlForCancel(redirectionPage);
-        final MockWebContext mockWebContext = (MockWebContext) context;
-        mockWebContext.addRequestParameters(TestsHelper.getParametersFromUrl(callbackUrl));
+        final Map<String, String> parameters = TestsHelper.getParametersFromUrl(callbackUrl);
+        for (final String key : parameters.keySet()) {
+            final J2EContext j2EContext = (J2EContext) context;
+            final MockHttpServletRequest request = (MockHttpServletRequest) j2EContext.getRequest();
+            request.addParameter(key, parameters.get(key));
+        }
     }
 
     protected String getCallbackUrlForCancel(final HtmlPage authorizationPage) throws Exception {

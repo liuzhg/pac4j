@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.pac4j.core.context;
 import java.util.regex.Pattern;
 
 /**
- * This class gathers all the configuration.
+ * Will be removed. Use {@link org.pac4j.core.config.Config} and {@link org.pac4j.core.config.ConfigSingleton} instead.
  * 
  * @author Jerome Leleu
  * @since 1.6.0
+ * @deprecated
  */
+@Deprecated
 public class BaseConfig {
 
     private final static String DEFAULT_URL = "/";

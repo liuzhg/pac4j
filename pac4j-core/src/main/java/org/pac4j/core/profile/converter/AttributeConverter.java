@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ public interface AttributeConverter<T extends Object> {
     /**
      * Convert an attribute to a specific type T.
      * 
-     * @param attribute
+     * @param attribute attribute
      * @return the converted attribute
      */
     public T convert(Object attribute);

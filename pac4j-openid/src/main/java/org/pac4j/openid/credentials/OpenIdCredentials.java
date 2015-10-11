@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ public class OpenIdCredentials extends Credentials {
     
     private static final long serialVersionUID = -5934736541999523245L;
     
-    private final ParameterList parameterList;
+    private ParameterList parameterList;
     
-    private final DiscoveryInformation discoveryInformation;
+    private DiscoveryInformation discoveryInformation;
     
     public OpenIdCredentials(final DiscoveryInformation discoveryInformation, final ParameterList parameterList,
                              final String clientName) {
@@ -55,5 +55,12 @@ public class OpenIdCredentials extends Credentials {
     public String toString() {
         return CommonHelper.toString(this.getClass(), "discoveryInformation", this.discoveryInformation,
                                      "parameterList", this.parameterList, "clientName", getClientName());
+    }
+
+    @Override
+    public void clear() {
+        this.parameterList = null;
+        this.discoveryInformation = null;
+        this.setClientName(null);
     }
 }

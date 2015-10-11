@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.jasig.cas.client.proxy.ProxyGrantingTicketStorageImpl;
 import org.jasig.cas.client.util.CommonUtils;
 import org.pac4j.cas.credentials.CasCredentials;
 import org.pac4j.cas.profile.CasProfile;
-import org.pac4j.core.client.BaseClient;
-import org.pac4j.core.client.Mechanism;
+import org.pac4j.core.client.IndirectClient;
+import org.pac4j.core.client.ClientType;
 import org.pac4j.core.client.RedirectAction;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.exception.RequiresHttpAction;
@@ -35,22 +35,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class is the CAS proxy receptor.
- * <p />
- * The url of the proxy receptor must be defined through the {@link #setCallbackUrl(String)} method, it's the <code>proxyReceptorUrl</code>
- * concept of the Jasig CAS client.
- * <p />
- * The proxy granting tickets and associations are stored by default in a {@link ProxyGrantingTicketStorageImpl} class, which can be
- * overriden by using the {@link #setProxyGrantingTicketStorage(ProxyGrantingTicketStorage)} method.
- * <p />
- * By default, the tickets and associations are cleaned every minute. The <code>millisBetweenCleanUps</code> property can be defined through
+ * <p>This class is the CAS proxy receptor.</p>
+ * <p>The url of the proxy receptor must be defined through the {@link #setCallbackUrl(String)} method, it's the <code>proxyReceptorUrl</code>
+ * concept of the Jasig CAS client.</p>
+ * <p>The proxy granting tickets and associations are stored by default in a {@link ProxyGrantingTicketStorageImpl} class, which can be
+ * overriden by using the {@link #setProxyGrantingTicketStorage(ProxyGrantingTicketStorage)} method.</p>
+ * <p>By default, the tickets and associations are cleaned every minute. The <code>millisBetweenCleanUps</code> property can be defined through
  * the {@link #setMillisBetweenCleanUps(int)} method (0 means no cleanup, greater than 0 means a cleanup every
- * <code>millisBetweenCleanUps</code> milli-seconds).
+ * <code>millisBetweenCleanUps</code> milli-seconds).</p>
  * 
  * @author Jerome Leleu
  * @since 1.4.0
  */
-public final class CasProxyReceptor extends BaseClient<CasCredentials, CasProfile> {
+public final class CasProxyReceptor extends IndirectClient<CasCredentials, CasProfile> {
     
     private static final Logger logger = LoggerFactory.getLogger(CasProxyReceptor.class);
     
@@ -67,8 +64,9 @@ public final class CasProxyReceptor extends BaseClient<CasCredentials, CasProfil
     private TimerTask timerTask;
     
     @Override
-    protected BaseClient<CasCredentials, CasProfile> newClient() {
+    protected IndirectClient<CasCredentials, CasProfile> newClient() {
         final CasProxyReceptor casProxyReceptor = new CasProxyReceptor();
+        casProxyReceptor.setCallbackUrl(this.callbackUrl);
         casProxyReceptor.setProxyGrantingTicketStorage(this.proxyGrantingTicketStorage);
         casProxyReceptor.setMillisBetweenCleanUps(this.millisBetweenCleanUps);
         return casProxyReceptor;
@@ -165,7 +163,7 @@ public final class CasProxyReceptor extends BaseClient<CasCredentials, CasProfil
     }
     
     @Override
-    public Mechanism getMechanism() {
-        return Mechanism.CAS_PROTOCOL;
+    public ClientType getClientType() {
+        return ClientType.CAS_PROTOCOL;
     }
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
  */
 package org.pac4j.core.profile;
 
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.pac4j.core.Clearable;
 import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,35 +39,35 @@ import org.slf4j.LoggerFactory;
  * @author Jerome Leleu
  * @since 1.0.0
  */
-public class UserProfile implements Serializable {
-    
+public class UserProfile implements Serializable, Externalizable, Clearable {
+
     private static final long serialVersionUID = 9020114478664816338L;
-    
+
     protected transient static final Logger logger = LoggerFactory.getLogger(UserProfile.class);
-    
+
     private String id;
-    
-    private final Map<String, Object> attributes = new HashMap<String, Object>();
-    
+
+    private Map<String, Object> attributes = new HashMap<String, Object>();
+
     public transient static final String SEPARATOR = "#";
-    
+
     private boolean isRemembered = false;
-    
-    private final List<String> roles = new ArrayList<String>();
-    
-    private final List<String> permissions = new ArrayList<String>();
-    
+
+    private List<String> roles = new ArrayList<String>();
+
+    private List<String> permissions = new ArrayList<String>();
+
     /**
      * Build a profile from user identifier and attributes.
      * 
-     * @param id
-     * @param attributes
+     * @param id user identifier
+     * @param attributes user attributes
      */
     public void build(final Object id, final Map<String, Object> attributes) {
         setId(id);
         addAttributes(attributes);
     }
-    
+
     /**
      * Return the attributes definition for this user profile. Null for this (generic) user profile.
      * 
@@ -71,62 +76,60 @@ public class UserProfile implements Serializable {
     protected AttributesDefinition getAttributesDefinition() {
         return null;
     }
-    
+
     /**
      * Add an attribute and perform conversion if necessary.
      * 
-     * @param key
-     * @param value
+     * @param key key of the attribute
+     * @param value value of the attribute
      */
     public void addAttribute(final String key, Object value) {
         if (value != null) {
             final AttributesDefinition definition = getAttributesDefinition();
             // no attributes definition -> no conversion
             if (definition == null) {
-                logger.debug("no conversion => key : {} / value : {} / {}", new Object[] {
-                    key, value, value.getClass()
-                });
+                logger.debug("no conversion => key : {} / value : {} / {}",
+                        new Object[] { key, value, value.getClass() });
                 this.attributes.put(key, value);
             } else {
                 value = definition.convert(key, value);
                 if (value != null) {
-                    logger.debug("converted to => key : {} / value : {} / {}", new Object[] {
-                        key, value, value.getClass()
-                    });
+                    logger.debug("converted to => key : {} / value : {} / {}",
+                            new Object[] { key, value, value.getClass() });
                     this.attributes.put(key, value);
                 }
             }
         }
     }
-    
+
     /**
      * Add attributes.
      * 
-     * @param attributes
+     * @param attributes use attributes
      */
     public void addAttributes(final Map<String, Object> attributes) {
         for (final String key : attributes.keySet()) {
             addAttribute(key, attributes.get(key));
         }
     }
-    
+
     /**
      * Set the identifier and convert it if necessary.
      * 
-     * @param id
+     * @param id user identifier
      */
     public void setId(final Object id) {
         if (id != null) {
             String sId = id.toString();
             final String type = this.getClass().getSimpleName();
-            if (type != null && sId.startsWith(type + SEPARATOR)) {
+            if (sId.startsWith(type + SEPARATOR)) {
                 sId = sId.substring(type.length() + SEPARATOR.length());
             }
             logger.debug("identifier : {}", sId);
             this.id = sId;
         }
     }
-    
+
     /**
      * Get the user identifier. This identifier is unique for this provider but not necessarily through all providers.
      * 
@@ -135,7 +138,7 @@ public class UserProfile implements Serializable {
     public String getId() {
         return this.id;
     }
-    
+
     /**
      * Get the user identifier with a prefix which is the profile type. This identifier is unique through all providers.
      * 
@@ -144,7 +147,7 @@ public class UserProfile implements Serializable {
     public String getTypedId() {
         return this.getClass().getSimpleName() + SEPARATOR + this.id;
     }
-    
+
     /**
      * Get attributes as immutable map.
      * 
@@ -153,17 +156,42 @@ public class UserProfile implements Serializable {
     public Map<String, Object> getAttributes() {
         return Collections.unmodifiableMap(this.attributes);
     }
-    
+
     /**
      * Return the attribute with name.
      * 
-     * @param name
+     * @param name attribute name
      * @return the attribute with name
      */
     public Object getAttribute(final String name) {
         return this.attributes.get(name);
     }
-    
+
+    /**
+     * Return the attribute with name.
+     *
+     * @param name the attribute name
+     * @param clazz the class of the attribute
+     * @param <T> the type of the attribute
+     * @return the attribute by its name
+     * @since 1.8
+     */
+    public <T> T getAttribute(final String name, final Class<T> clazz) {
+        final Object attribute = getAttribute(name);
+
+        if (attribute == null) {
+            return null;
+        }
+
+        if (!clazz.isAssignableFrom(attribute.getClass())) {
+            throw new ClassCastException("Attribute [" + name
+                    + " is of type " + attribute.getClass()
+                    + " when we were expecting " + clazz);
+        }
+
+        return (T) attribute;
+    }
+
     /**
      * Add a role.
      * 
@@ -172,7 +200,16 @@ public class UserProfile implements Serializable {
     public void addRole(final String role) {
         this.roles.add(role);
     }
-    
+
+    /**
+     * Add roles.
+     *
+     * @param roles the roles to add.
+     */
+    public void addRoles(final List<String> roles) {
+        this.roles.addAll(roles);
+    }
+
     /**
      * Add a permission.
      * 
@@ -183,41 +220,14 @@ public class UserProfile implements Serializable {
     }
 
     /**
-     * Check if the user has one of the expected roles.
+     * Add permissions.
      *
-     * @param expectedRoles
-     * @return
+     * @param permissions the permissions to add.
      */
-    public boolean hasAnyRole(final String[] expectedRoles) {
-        if (expectedRoles == null || expectedRoles.length == 0) {
-            return true;
-        }
-        for (final String role: expectedRoles) {
-            if (this.roles.contains(role)) {
-                return true;
-            }
-        }
-        return false;
+    public void addPermissions(final List<String> permissions) {
+        this.permissions.addAll(permissions);
     }
 
-    /**
-     * Check if the user has all expected roles.
-     *
-     * @param expectedRoles
-     * @return
-     */
-    public boolean hasAllRoles(final String[] expectedRoles) {
-        if (expectedRoles == null || expectedRoles.length == 0) {
-            return true;
-        }
-        for (final String role: expectedRoles) {
-            if (!this.roles.contains(role)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
     /**
      * Define if this profile is remembered.
      * 
@@ -226,7 +236,7 @@ public class UserProfile implements Serializable {
     public void setRemembered(final boolean rme) {
         this.isRemembered = rme;
     }
-    
+
     /**
      * Get the roles of the user.
      * 
@@ -235,7 +245,7 @@ public class UserProfile implements Serializable {
     public List<String> getRoles() {
         return Collections.unmodifiableList(this.roles);
     }
-    
+
     /**
      * Get the permissions of the user.
      * 
@@ -244,7 +254,7 @@ public class UserProfile implements Serializable {
     public List<String> getPermissions() {
         return Collections.unmodifiableList(this.permissions);
     }
-    
+
     /**
      * Is the user remembered?
      * 
@@ -253,10 +263,33 @@ public class UserProfile implements Serializable {
     public boolean isRemembered() {
         return this.isRemembered;
     }
-    
+
     @Override
     public String toString() {
         return CommonHelper.toString(this.getClass(), "id", this.id, "attributes", this.attributes, "roles",
-                                     this.roles, "permissions", this.permissions, "isRemembered", this.isRemembered);
+                this.roles, "permissions", this.permissions, "isRemembered", this.isRemembered);
+    }
+
+    @Override
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        out.writeObject(this.id);
+        out.writeObject(this.attributes);
+        out.writeBoolean(this.isRemembered);
+        out.writeObject(this.roles);
+        out.writeObject(this.permissions);
+    }
+
+    @Override
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        this.id = (String) in.readObject();
+        this.attributes = (Map) in.readObject();
+        this.isRemembered = (boolean) in.readBoolean();
+        this.roles = (List) in.readObject();
+        this.permissions = (List) in.readObject();
+    }
+
+    @Override
+    public void clear() {
+        // No-op. Allow subtypes to specify which state should be cleared out.
     }
 }

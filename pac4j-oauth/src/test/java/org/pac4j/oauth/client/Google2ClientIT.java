@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ public class Google2ClientIT extends OAuthClientIT {
         google2Client.setKey(KEY);
         google2Client.setSecret(SECRET);
         google2Client.setCallbackUrl(CALLBACK_URL);
-        google2Client.redirect(MockWebContext.create(), false, false);
+        google2Client.redirect(MockWebContext.create(), false);
     }
 
     @SuppressWarnings("rawtypes")
@@ -85,7 +85,7 @@ public class Google2ClientIT extends OAuthClientIT {
         final HtmlTextInput email = form.getInputByName("Email");
         email.setValueAttribute("testscribeup@gmail.com");
         final HtmlPasswordInput passwd = form.getInputByName("Passwd");
-        passwd.setValueAttribute("testpwdscribeup90");
+        passwd.setValueAttribute("testpwdscribeup91");
         final HtmlSubmitInput submit = form.getInputByName("signIn");
         final HtmlPage callbackPage = submit.click();
         final String callbackUrl = callbackPage.getUrl().toString();

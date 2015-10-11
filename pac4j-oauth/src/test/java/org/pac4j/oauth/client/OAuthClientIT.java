@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package org.pac4j.oauth.client;
 
 import org.pac4j.core.client.BaseClient;
-import org.pac4j.core.client.Mechanism;
+import org.pac4j.core.client.ClientType;
 import org.pac4j.core.client.ClientIT;
 import org.pac4j.core.util.TestsHelper;
 
@@ -48,8 +48,7 @@ public abstract class OAuthClientIT extends ClientIT {
         client.setSecret(null);
         TestsHelper.initShouldFail(client, "secret cannot be blank");
     }
-    
-    @Override
+
     protected BaseClient internalTestClone(final BaseClient oldBaseClient) {
         BaseOAuthClient oldClient = (BaseOAuthClient) oldBaseClient;
         oldClient.setKey(KEY);
@@ -73,7 +72,7 @@ public abstract class OAuthClientIT extends ClientIT {
     }
     
     @Override
-    protected Mechanism getMechanism() {
-        return Mechanism.OAUTH_PROTOCOL;
+    protected ClientType getClientType() {
+        return ClientType.OAUTH_PROTOCOL;
     }
 }

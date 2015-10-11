@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,16 +15,20 @@
  */
 package org.pac4j.core.context;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * This implementation uses the J2E request.
+ * This partial J2E request context is not used by any implementation. It might be removed in the future.
  *
  * @author Jerome Leleu
  * @since 1.4.0
+ * @deprecated
  */
+@Deprecated
 public class J2ERequestContext extends BaseResponseContext {
 
     private final HttpServletRequest request;
@@ -34,62 +38,68 @@ public class J2ERequestContext extends BaseResponseContext {
     }
 
     /**
-     * Return a request parameter.
-     *
-     * @param name
-     * @return the request parameter
+     * {@inheritDoc}
      */
     public String getRequestParameter(final String name) {
         return this.request.getParameter(name);
     }
 
     /**
-     * Return all request parameters.
-     *
-     * @return all request parameters
+     * {@inheritDoc}
      */
     public Map<String, String[]> getRequestParameters() {
         return this.request.getParameterMap();
     }
 
     /**
-     * Return a request header.
-     *
-     * @param name
-     * @return the request header
+     * {@inheritDoc}
+     */
+    public Object getRequestAttribute(final String name) { return this.request.getAttribute(name); }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setRequestAttribute(final String name, final Object value) { this.request.setAttribute(name, value); }
+
+    /**
+     * {@inheritDoc}
      */
     public String getRequestHeader(final String name) {
         return this.request.getHeader(name);
     }
 
     /**
-     * Save an attribute in session.
-     *
-     * @param name
-     * @param value
+     * {@inheritDoc}
      */
     public void setSessionAttribute(final String name, final Object value) {
         this.request.getSession().setAttribute(name, value);
     }
 
     /**
-     * Get an attribute from session.
-     *
-     * @param name
-     * @return the session attribute
+     * {@inheritDoc}
      */
     public Object getSessionAttribute(final String name) {
         return this.request.getSession().getAttribute(name);
     }
 
+    @Override
+    public Object getSessionIdentifier() {
+        return this.request.getSession().getId();
+    }
+
     /**
-     * Return the request method : GET, POST...
-     *
-     * @return the request method
+     * {@inheritDoc}
      */
     public String getRequestMethod() {
         return this.request.getMethod();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getRemoteAddr() { return this.request.getRemoteAddr(); }
+
+
 
     /**
      * Return the HTTP request.
@@ -101,32 +111,29 @@ public class J2ERequestContext extends BaseResponseContext {
     }
 
     /**
-     * Return the server name.
-     *
-     * @return the server name
+     * {@inheritDoc}
      */
     public String getServerName() {
         return this.request.getServerName();
     }
 
     /**
-     * Return the server port.
-     *
-     * @return the server port
+     * {@inheritDoc}
      */
     public int getServerPort() {
         return this.request.getServerPort();
     }
 
     /**
-     * Return the scheme.
-     *
-     * @return the scheme
+     * {@inheritDoc}
      */
     public String getScheme() {
         return this.request.getScheme();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public String getFullRequestURL() {
         StringBuffer requestURL = request.getRequestURL();
         String queryString = request.getQueryString();
@@ -137,4 +144,20 @@ public class J2ERequestContext extends BaseResponseContext {
         }
     }
 
+    @Override
+    public Collection<Cookie> getRequestCookies() {
+        final javax.servlet.http.Cookie[] cookies = this.request.getCookies();
+        final Collection<Cookie> pac4jCookies = new LinkedHashSet<>(cookies.length);
+        for (javax.servlet.http.Cookie c : this.request.getCookies()) {
+            final Cookie cookie = new Cookie(c.getName(), c.getValue());
+            cookie.setComment(c.getComment());
+            cookie.setDomain(c.getDomain());
+            cookie.setHttpOnly(c.isHttpOnly());
+            cookie.setMaxAge(c.getMaxAge());
+            cookie.setPath(c.getPath());
+            cookie.setSecure(c.getSecure());
+            pac4jCookies.add(cookie);
+        }
+        return pac4jCookies;
+    }
 }

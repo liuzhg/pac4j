@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Patrice de Saint Steban
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -34,5 +34,11 @@ public class GaeUserCredentials extends Credentials {
 	
 	public User getUser() {
 		return user;
+	}
+
+	@Override
+	public void clear() {
+		this.user = null;
+		this.setClientName(null);
 	}
 }
